@@ -11,4 +11,4 @@ More information on Homey can be found on http://www.athom.nl.
 # Notes
 
 - Make sure to visit the settings page to enter the IP address and port of the OTG in the network.
-- OpenTherm messages can come by in a slow pace, which means that updates can also be slow. E.g. when setting a new temperature on the thermostat, it will not take effect immediately. So when re-opening the device it can still show an old version. There's no other remedy than patience.
+- OpenTherm messages can come by in a slow pace, which means that updates can also be slow. E.g. when setting a new temperature on the thermostat, it will not take effect immediately. So when re-opening the device it can still show an old value. There's no other remedy than patience.

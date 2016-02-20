@@ -1,0 +1,74 @@
+{
+	"id": "com.tclcode.otgw",
+    "name": {
+        "en": "OpenTherm Gateway"
+    },
+    "version": "0.0.1",
+	"compatibility": "*",
+	"description": {
+		"en": "The OpenTherm Gateway",
+		"nl": "De OpenTherm Gateway"
+	},
+	"author": {
+		"name": "Ramon Baas",
+		"website": "http://otgw.tclcode.com/"
+	},
+	"category": "climate",
+	"images": {
+		"large": "assets/images/large.jpg",
+		"small": "assets/images/small.jpg"
+	},
+	"drivers": [
+		{
+			"id": "thermostat",
+			"name": {
+				"en": "Thermostat",
+				"nl": "Thermostaat"
+			},
+			"class": "thermostat",
+			"capabilities": [ "target_temperature", "measure_temperature" ],
+			"images": {
+				"large": "drivers/otg/assets/images/large.png",
+				"small": "drivers/otg/assets/images/small.png"
+			},
+			"pair": [
+				{
+					"id": "list_thermostats",
+					"template": "list_devices",
+					"navigation": {
+						"next": "add_thermostats"
+					}
+				},
+				{
+					"id": "add_thermostats",
+					"template": "add_devices"
+				}
+			]
+		},
+			{
+			"id": "sensor",
+			"name": {
+				"en": "Sensor",
+				"nl": "Sensor"
+			},
+			"class": "sensor",
+			"capabilities": [ "measure_temperature" ],
+			"pair": [
+				{
+					"id": "list_sensors",
+					"template": "list_devices",
+					"navigation": {
+						"next": "add_sensors"
+					}
+				},
+				{
+					"id": "add_sensors",
+					"template": "add_devices"
+				}
+			]
+		}
+],
+	"dependencies": {
+		"otg-api": "*"
+	}
+}

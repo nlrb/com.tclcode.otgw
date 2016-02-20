@@ -1,0 +1,34 @@
+{
+    "settings": {
+        "name": "OpenTherm Gateway instellingen",
+		"app": {
+			"title": "Applicatie instellingen",
+			"network": {
+				"title": "Netwerk",
+				"description": "De OpenTherm Gateway zal de seriele data communiceren naar Homey via TCP/IP. Daarom moeten hieronder de netwerkinstellingen van de Gateway ingevuld worden.",
+				"ip": "IP adres : poort",
+				"submit": "Sla netwerk instellingen op"
+			},
+			"features": {
+				"title": "Mogelijkheden",
+				"description": "Seleceer hoe de Homey applicatie zich moet gedragen.",
+				"set": "Een temperatuur wijziging is",
+				"seton": "permanent",
+				"setoff": "tijdelijk (tot de volgende thermostaat programma wijziging)",
+				"submit": "Sla mogelijkheden op"
+			}
+		},
+		"gateway": {
+			"title": "Gateway intstellingen",
+			"description": "De OpenTherm Gateway instellingen.",
+			"device": {
+				"title": "Configuratie"
+			}
+		},
+		"search": {
+			"title": "Zoeken naar de OpenTherm Gateway op ",
+			"success": "De OpenTherm Gateway is gevonden. De instellingen zijn opgeslagen.",
+			"failed": "De OpenTherm Gateway kan niet gevonden worden op het opgegeven IP adres en poort!"
+		}
+	}
+}

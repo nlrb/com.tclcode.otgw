@@ -1,0 +1,34 @@
+{
+    "settings": {
+        "name": "OpenTherm Gateway settings page",
+		"app": {
+			"title": "Application configuration",
+			"network": {
+				"title": "Network",
+				"description": "The OpenTherm Gateway is expected to communicate the serial data via TCP/IP. You will need to define the IP address and port on your network where the Gateway can be found.",
+				"ip": "IP address : port",
+				"submit": "Save network settings"
+			},
+			"features": {
+				"title": "Features",
+				"description": "Select how the Homey application should behave.",
+				"set": "Temperature change is",
+				"seton": "permanent",
+				"setoff": "temporary (until a thermostat program change)",
+				"submit": "Save feature settings"
+			}
+		},
+		"gateway": {
+			"title": "Gateway configuration",
+			"description": "The OpenTherm Gateway settings.",
+			"device": {
+				"title": "Device settings"
+			}
+		},
+		"search": {
+			"title": "Searching for OpenTherm Gateway on ",
+			"success": "Found your OpenTherm Gateway. Settings have been saved.",
+			"failed": "Unable to locate the OpenTherm Gateway on the given IP and port!"
+		}
+	}
+}

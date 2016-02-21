@@ -30,7 +30,7 @@ var self = module.exports = {
 				if (target_temperature > 30) target_temperature = 30;
 				
 				var tt = Math.round(target_temperature * 2) / 2;
-				otgw.setTargetTemp(tt);
+				otgw.setTargetTemp(device, tt);
 				self.realtime(device, 'target_temperature', tt);
 			}
 		},
@@ -38,6 +38,14 @@ var self = module.exports = {
 			get: function(device, callback) {
 					if (typeof callback == 'function') {
 						callback(null, otgw.getValue('CurrentTemperature'));
+					}
+			}
+		},
+		thermostat_state: {
+			get: function(device, callback) {
+					if (typeof callback == 'function') {
+						Homey.log(otgw.getThermostatState(device));
+						callback(null, otgw.getThermostatState(device));
 					}
 			}
 		}
@@ -61,6 +69,14 @@ var self = module.exports = {
 			
 			// err, result style
 			callback(null, devices);
+		});
+
+		// Update driver administration when a device is added
+		socket.on('add_device', function(device_data, callback) {
+			var device = device_data['data'];
+			otgw.addDevice(self, device, 'thermostat');
+
+			callback();
 		});
 	}
 }

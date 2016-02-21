@@ -3,7 +3,7 @@
     "name": {
         "en": "OpenTherm Gateway"
     },
-    "version": "0.0.1",
+    "version": "0.0.2",
 	"compatibility": "*",
 	"description": {
 		"en": "The OpenTherm Gateway",
@@ -26,10 +26,10 @@
 				"nl": "Thermostaat"
 			},
 			"class": "thermostat",
-			"capabilities": [ "target_temperature", "measure_temperature" ],
+			"capabilities": [ "target_temperature", "measure_temperature", "thermostat_state" ],
 			"images": {
-				"large": "drivers/otg/assets/images/large.png",
-				"small": "drivers/otg/assets/images/small.png"
+				"large": "drivers/thermostat/assets/images/large.png",
+				"small": "drivers/thermostat/assets/images/small.png"
 			},
 			"pair": [
 				{
@@ -46,13 +46,35 @@
 			]
 		},
 			{
-			"id": "sensor",
+			"id": "temperature",
 			"name": {
-				"en": "Sensor",
-				"nl": "Sensor"
+				"en": "Temperature Sensor",
+				"nl": "Temperatuur Sensor"
 			},
 			"class": "sensor",
 			"capabilities": [ "measure_temperature" ],
+			"pair": [
+				{
+					"id": "list_sensors",
+					"template": "list_devices",
+					"navigation": {
+						"next": "add_sensors"
+					}
+				},
+				{
+					"id": "add_sensors",
+					"template": "add_devices"
+				}
+			]
+		},
+		{
+			"id": "pressure",
+			"name": {
+				"en": "Pressure Sensor",
+				"nl": "Druk Sensor"
+			},
+			"class": "sensor",
+			"capabilities": [ "measure_pressure" ],
 			"pair": [
 				{
 					"id": "list_sensors",

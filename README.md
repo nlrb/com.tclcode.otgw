@@ -7,6 +7,7 @@ More information on Homey can be found on http://www.athom.nl.
 # Versions
 
 0.0.1 Initial release - functionality limited to one thermostat and multiple temperature sensors
+0.0.2 Second release - added pressure sensor, 2nd thermostat, flags, fixes & code refactoring
 
 # Notes
 

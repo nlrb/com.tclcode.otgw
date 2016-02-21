@@ -7,7 +7,6 @@ function init() {
 	Homey.log("Starting OTG app");
 	var ip_addr = Homey.manager('settings').get('ip');
 	var ip_port = Homey.manager('settings').get('port');
-	Homey.log(ip_addr + ':' + ip_port);
 	var ok = otgw.openComm(ip_addr, ip_port);
 	if (ok) {
 		var features = Homey.manager('settings').get('features');

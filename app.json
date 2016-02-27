@@ -6,8 +6,8 @@
     "version": "0.1.0",
 	"compatibility": "*",
 	"description": {
-		"en": "The OpenTherm Gateway",
-		"nl": "De OpenTherm Gateway"
+		"en": "Control your OpenTherm Gateway via Homey",
+		"nl": "Bestuur je OpenTherm Gateway met Homey"
 	},
 	"author": {
 		"name": "Ramon Baas",

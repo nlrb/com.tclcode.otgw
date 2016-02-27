@@ -3,34 +3,21 @@ module.exports = [
         description: 'Start OTG search',
         method: 'PUT',
         path: '/search/',
-        requires_authorizaton: false,
+        requires_authorizaton: true,
         fn: function(callback, args) {
-            console.log("/search");
             var openComm = Homey.app.api.openComm;
 			var ok = openComm(args['body']['ip'], args['body']['port']);
 			callback(null, ok);
         }
     },
     {
-        description: 'Determine of OTG has been found',
+        description: 'Get OTG configuration',
         method: 'GET',
-        path: '/found/',
+        path: '/getOtgConfig/',
         requires_authorizaton: false,
         fn: function(callback, args) {
-            console.log("/found");
-            var found = Homey.app.api.found();
-			callback(null, found);    
-        }
-    },
-    {
-        description: 'Update feature settings',
-        method: 'PUT',
-        path: '/feature/',
-        requires_authorizaton: false,
-        fn: function(callback, args) {
-            console.log("/feature");
-            var setFeatures = Homey.app.api.setFeatures;
-			var ok = setFeatures(args['body']['features']);
+            var getGatewayConfig = Homey.app.api.getGatewayConfig;
+			var ok = getGatewayConfig();
 			callback(null, ok);
         }
     }

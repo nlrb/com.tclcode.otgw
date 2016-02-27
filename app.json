@@ -3,7 +3,7 @@
     "name": {
         "en": "OpenTherm Gateway"
     },
-    "version": "0.0.2",
+    "version": "0.1.0",
 	"compatibility": "*",
 	"description": {
 		"en": "The OpenTherm Gateway",
@@ -26,7 +26,7 @@
 				"nl": "Thermostaat"
 			},
 			"class": "thermostat",
-			"capabilities": [ "target_temperature", "measure_temperature", "thermostat_state" ],
+			"capabilities": [ "target_temperature", "measure_temperature", "thermostat_mode", "thermostat_state" ],
 			"images": {
 				"large": "drivers/thermostat/assets/images/large.png",
 				"small": "drivers/thermostat/assets/images/small.png"
@@ -67,7 +67,7 @@
 				}
 			]
 		},
-		{
+			{
 			"id": "pressure",
 			"name": {
 				"en": "Pressure Sensor",
@@ -89,7 +89,43 @@
 				}
 			]
 		}
-],
+	],
+	"flow": {
+		"actions": [
+			{
+				"id": "setOutsideTemperature",
+				"title": {
+					"en": "Set outside temperature",
+					"nl": "Zet buitentemperatuur"
+				},
+				"args": [
+					{
+						"name": "temperature",
+						"type": "number",
+						"min": "-20",
+						"max": "40",
+						"placeholder": { "en": "In degree celcius", "nl": "In graden celcius" }
+					}
+				]
+			},
+			{
+				"id": "setRoomHumidity",
+				"title": {
+					"en": "Set humidity level",
+					"nl": "Zet luchtvochtigheid"
+				},
+				"args": [
+					{
+						"name": "humidity",
+						"type": "number",
+						"min": "0",
+						"max": "100",
+						"placeholder": { "en": "In percent", "nl": "Als percentage" }
+					}
+				]
+			}
+		]
+    },
 	"dependencies": {
 		"otg-api": "*"
 	}

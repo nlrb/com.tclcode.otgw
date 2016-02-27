@@ -15,6 +15,9 @@
 				"set": "Temperature change is",
 				"seton": "permanent",
 				"setoff": "temporary (until a thermostat program change)",
+				"ventilation": "Fake ventilation support for humidity sensor?",
+				"venton": "Yes",
+				"ventoff": "No",
 				"submit": "Save feature settings"
 			}
 		},
@@ -26,9 +29,9 @@
 			}
 		},
 		"search": {
-			"title": "Searching for OpenTherm Gateway on ",
+			"title": "Searching for OpenTherm Gateway on __addr__...",
 			"success": "Found your OpenTherm Gateway. Settings have been saved.",
-			"failed": "Unable to locate the OpenTherm Gateway on the given IP and port!"
+			"failed": "Unable to locate the OpenTherm Gateway on __addr__!"
 		}
 	}
 }

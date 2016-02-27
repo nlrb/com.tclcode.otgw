@@ -9,8 +9,6 @@ var self = module.exports = {
 	init: function(devices, callback) {
 		devices.forEach(function(device) {
 			otgw.addDevice(self, device, 'thermostat');
-			self.realtime(device, 'target_temperature', otgw.getValue('CurrentSetpoint'))								
-			self.realtime(device, 'measure_temperature', otgw.getValue('CurrentTemperature'))								
 		});
 		
 		// we're ready
@@ -21,7 +19,11 @@ var self = module.exports = {
 		target_temperature: {
 			get: function(device, callback) {
 					if (typeof callback == 'function') {
-						callback(null, otgw.getValue('CurrentSetpoint'));
+						var val = otgw.getValue('target_temperature', 'RemoteOverrideRoomSetpoint');
+						if (val == null || val == '0.00') {
+							val = otgw.getValue('target_temperature', 'CurrentSetpoint');
+						}
+						callback(null, val);
 					}
 			},
 			set: function(device, target_temperature, callback) {
@@ -37,14 +39,29 @@ var self = module.exports = {
 		measure_temperature: {
 			get: function(device, callback) {
 					if (typeof callback == 'function') {
-						callback(null, otgw.getValue('CurrentTemperature'));
+						callback(null, otgw.getValue('measure_temperature', 'CurrentTemperature'));
+					}
+			}
+		},
+		thermostat_mode: {
+			get: function(device, callback) {
+					if (typeof callback == 'function') {
+						otgw.debug('thermostat_mode: get');
+						callback(null, otgw.getThermostatMode());
+					}
+			},
+			set: function(device, target_mode, callback) {
+					if (typeof callback == 'function') {
+						otgw.debug('thermostat_mode: set' + target_mode);
+						otgw.setThermostatMode(target_mode);
+						callback(null, target_mode);
 					}
 			}
 		},
 		thermostat_state: {
 			get: function(device, callback) {
 					if (typeof callback == 'function') {
-						Homey.log(otgw.getThermostatState(device));
+						otgw.debug(otgw.getThermostatState(device));
 						callback(null, otgw.getThermostatState(device));
 					}
 			}

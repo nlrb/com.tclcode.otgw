@@ -6,15 +6,10 @@ var otgw = require('otg-api');
 
 function createSensorDriver(driver) {
 	var self = {
-	
+
 		init: function(devices, callback) {
 			devices.forEach(function(device) {
-				otgw.addDevice(self, device, 'temperature');
-				// Assumption: sensor devices have only one value
-				var val = otgw.getValue(device.watch[0].variable);
-				if (val) {
-					self.realtime(device, 'measure_temperature', val);
-				}
+				otgw.addDevice(self, device);
 			});
 			
 			// we're ready
@@ -24,9 +19,17 @@ function createSensorDriver(driver) {
 		capabilities: {
 			measure_temperature: {
 				get: function(device, callback) {
+						// Assumption: sensor devices have only one value
 						if (typeof callback == 'function') {
-							// Assumption: sensor devices have only one value
-							callback(null, otgw.getValue(device.watch[0].variable));
+							callback(null, otgw.getValue('measure_temperature', device.watch[0].variable));
+						}
+				}
+			},
+			measure_pressure: {
+				get: function(device, callback) {
+						// Assumption: sensor devices have only one value
+						if (typeof callback == 'function') {
+							callback(null, otgw.getValue('measure_pressure', device.watch[0].variable));
 						}
 				}
 			}
@@ -38,7 +41,7 @@ function createSensorDriver(driver) {
 		},
 		
 		pair: function(socket) {
-			Homey.log('Sensor pairing has started...');
+			otgw.debug('Sensor pairing has started...');
 
 			// Check if we have found and OTG
 			socket.emit('authorized', otgw.checkFound());
@@ -55,7 +58,7 @@ function createSensorDriver(driver) {
 			// Update driver administration when a device is added
 			socket.on('add_device', function(device_data, callback) {
 				var device = device_data['data'];
-				otgw.addDevice(self, device, driver);
+				otgw.addDevice(self, device);
 
 				callback();
 			});

@@ -33,84 +33,60 @@
 				$scope.messageActive = false;
 				$scope.message = '';
 				$scope.invalidIp = false;
-				$scope.ip = '';
-				$scope.port = '';
-				$scope.features = { permanent: '1' };
+				$scope.network = {};
+				$scope.features = {};
+				$scope.config = {};
 				$scope.timeout;
 				
 				// Save the network configuration
 				$scope.networkSave = function(form) {
 					if (form.$valid) {
-						console.log('>>networkSave');
-						$scope.message = __('settings.search.title') + $scope.ip + ':' + $scope.port;
+						console.log('Saving network settings');
+						var address = ' ' + $scope.network.ip + ':' + $scope.network.port;
+						$scope.message = __('settings.search.title', { addr: address });
 						$scope.messageActive = true;
 						// Search for OTG
-						Homey.api('PUT', '/search/', { 'ip': $scope.ip, 'port': $scope.port }, function(err, ok) {
-							if (ok) {
-								if ($scope.timeout) {
-									clearTimeout($scope.timeout);
-								}
-								$scope.timeout = setTimeout(function(){ $scope.checkFound(form); }, 3000);
-							}
-						});
+						Homey.api('PUT', '/search/', { 'ip': $scope.network.ip, 'port': $scope.network.port }, function(err, ok) {});
 					}
 				}
 				
-				$scope.checkFound = function(form) {
-					Homey.api('GET', '/found/', {}, function (err, found) {
-						$scope.foundOTG = found;
-						console.log("Found state " + found);
-						if ($scope.foundOTG) {
-							console.log("Setting IP & port");
-							Homey.set('ip', $scope.ip);
-							Homey.set('port', $scope.port);
-							$scope.message = __('settings.search.success');
-						} else {
-							console.log("Failure :-(");
-							//$('#input').focus(); // set focus to first input field
-							//form.$setValidity("network-ip", false);
-							//form.$setValidity("network-port", false);
-							$scope.message = __('settings.search.failed');
-						}
-						$scope.$apply();
-					});
+				$scope.checkFound = function(found) {
+					$scope.foundOTG = found;
+					console.log("Found state " + found);
+					var address = ' ' + $scope.network.ip + ':' + $scope.network.port;
+					if (found) {
+						console.log("Setting IP & port");
+						Homey.set('network', $scope.network);
+						$scope.message = __('settings.search.success', { addr: address });
+					} else {
+						console.log("Failure :-(");
+						$scope.network = {};
+						$scope.networkForm.$setPristine();
+						$scope.message = __('settings.search.failed', { addr: address });
+					}
+					$scope.$apply();
 				}
 				
 				// Read the network configuration
 				$scope.getNetworkConfig = function() {
 					console.log("In getNetworkConfig");
-					Homey.get('ip', function(err, ip) {
-						console.log("Getting IP");
+					Homey.get('network', function(err, network) {
+						console.log("Getting network settings");
 						if (err) { 
-							return console.error('Could not get ip', err);
+							return console.error('Could not get network settings', err);
 						}
-						$scope.ip = ip;
-						console.log(ip);
-						$scope.$apply();
-					});
-					Homey.get('port', function(err, port) {
-						if (err) { 
-							return console.error('Could not get port', err);
-						}
-						$scope.port = port;
+						$scope.network = network;
 						$scope.$apply();
 					});
 				}
 					
 				// Save the features
 				$scope.featureSave = function() {
-					// Send the settings to the driver
-					Homey.api('PUT', '/feature/', { 'features': $scope.features }, function(err, ok) {
-						// Only save settings if driver validation is OK
-						if (ok) {
-							Homey.set('features', $scope.features);
-						} else {
-							console.log('Could not save feature settings ' + ok);
-						}
-					});
+					// Store the feature settings
+					Homey.set('features', $scope.features);
 				};
 				
-				// Read the feature configuration
+				// Read the configuration setting (features, OTG)
 				$scope.getFeatureConfig = function() {
 					Homey.get('features', function(err, value) {
 						if (value) {
@@ -119,11 +95,27 @@
 						}
 					});
 				}
+
+				// Actions for back-end triggers
+				Homey.on('found_otg', $scope.checkFound);
+				Homey.on('config_change', function(value) {
+					if (value) {
+						$scope.config = value;
+						$scope.$apply();
+					}
+				});
+
 				console.log("Retrieving network config");
 				$scope.getNetworkConfig();
 				$scope.getFeatureConfig();
+				Homey.api('GET', '/getOtgConfig/', {}, function(err, config) {
+					if (config) {
+						$scope.config = config;
+						$scope.$apply();
+					}
+				});
 			}]);
-
+			
 			function onHomeyReady(){
 				angular.bootstrap(document, ['OtgSettingsApp']);
 				Homey.ready();
@@ -144,9 +136,9 @@
 			<fieldset>
 				<legend data-i18n="settings.app.network.title"></legend>
 				<form name="networkForm" class="network" ng-class="{'submitted': submitted}" ng-submit="networkSave(networkForm)" >
-					<div class="oneline"><label for="network-ip" data-i18n="settings.app.network.ip"></label><input class="network-input network-ip" ng-model="ip" placeholder="0.0.0.0" ng-pattern="/^([0-9]{1,3})[.]([0-9]{1,3})[.]([0-9]{1,3})[.]([0-9]{1,3})$/" required/></div>
+					<div class="oneline"><label for="network-ip" data-i18n="settings.app.network.ip"></label><input class="network-input network-ip" ng-model="network.ip" placeholder="0.0.0.0" ng-pattern="/^([0-9]{1,3})[.]([0-9]{1,3})[.]([0-9]{1,3})[.]([0-9]{1,3})$/" required/></div>
 					&nbsp;&nbsp;&nbsp;:
-					<div class="oneline"><input class="network-input network-port" ng-model="port" placeholder="23" ng-pattern="/^\d+$/" required/></div>
+					<div class="oneline"><input class="network-input network-port" ng-model="network.port" placeholder="23" ng-pattern="/^\d+$/" required/></div>
 					<p></p>
 					<button type="submit" class="btn btn-default" ng-click="submitted=true;" data-i18n="settings.app.network.submit"></button>
 				</form>
@@ -156,8 +148,12 @@
 				<legend data-i18n="settings.app.features.title"></legend>
 				<form ng-submit="featureSave()">
 					<div class="oneline" data-i18n="settings.app.features.set"></div>
-					<input type="radio" id="set-on" value="1" ng-model="features.permanent"><label for="set-on" data-i18n="settings.app.features.seton"></label>
-					<input type="radio" id="set-off" value="0" ng-model="features.permanent"><label for="set-off" data-i18n="settings.app.features.setoff"></label>
+					<input type="radio" id="pset-on" value="1" ng-model="features.permanent"><label for="set-on" data-i18n="settings.app.features.seton"></label>
+					<input type="radio" id="pset-off" value="0" ng-model="features.permanent"><label for="set-off" data-i18n="settings.app.features.setoff"></label>
+					<p></p>
+					<div class="oneline" data-i18n="settings.app.features.ventilation"></div>
+					<input type="radio" id="vset-on" value="1" ng-model="features.ventilation"><label for="set-on" data-i18n="settings.app.features.venton"></label>
+					<input type="radio" id="vset-off" value="0" ng-model="features.ventilation"><label for="set-off" data-i18n="settings.app.features.ventoff"></label>
 					<p></p>
 					<button type="submit" class="btn btn-default" ng-click="submitted=true;" data-i18n="settings.app.features.submit"></button>
 				</form>
@@ -168,6 +164,9 @@
 			<h1 data-i18n="settings.gateway.title"></h1>
 			<fieldset>
 				<legend data-i18n="settings.gateway.device.title"></legend>
+				<div ng-repeat="item in config">
+					{{item.txt}}: {{item.txtVal}}
+				</div>
 			</fieldset>
 		</div>
 	</body>

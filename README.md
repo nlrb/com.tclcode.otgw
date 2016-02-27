@@ -2,12 +2,13 @@
 
 This is the OpenTherm Gateway application for Homey.
 More information on the OpenTherm Gateway (OTG) can be found on http://otgw.tclcode.com.
-More information on Homey can be found on http://www.athom.nl.
+More information on Homey can be found on http://www.athom.com.
 
 # Versions
 
-0.0.1 Initial release - functionality limited to one thermostat and multiple temperature sensors
-0.0.2 Second release - added pressure sensor, 2nd thermostat, flags, fixes & code refactoring
+* 0.0.1 Initial release - functionality limited to one thermostat and multiple temperature sensors
+* 0.0.2 Second release - added pressure sensor, 2nd thermostat, flags, fixes & code refactoring
+* 0.1.0 First app-store release - added gateway config (RO), language support, flow actions, fixes/refactoring
 
 # Notes
 

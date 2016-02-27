@@ -15,6 +15,9 @@
 				"set": "Een temperatuur wijziging is",
 				"seton": "permanent",
 				"setoff": "tijdelijk (tot de volgende thermostaat programma wijziging)",
+				"ventilation": "Emuleer ventilatieondesteuning voor vochtigheidsensor?",
+				"venton": "Ja",
+				"ventoff": "Nee",
 				"submit": "Sla mogelijkheden op"
 			}
 		},
@@ -26,9 +29,9 @@
 			}
 		},
 		"search": {
-			"title": "Zoeken naar de OpenTherm Gateway op ",
+			"title": "Zoeken naar de OpenTherm Gateway op __addr__...",
 			"success": "De OpenTherm Gateway is gevonden. De instellingen zijn opgeslagen.",
-			"failed": "De OpenTherm Gateway kan niet gevonden worden op het opgegeven IP adres en poort!"
+			"failed": "De OpenTherm Gateway kan niet gevonden worden op __addr__!"
 		}
 	}
 }

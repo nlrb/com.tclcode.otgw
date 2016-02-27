@@ -15,8 +15,8 @@
 	},
 	"category": "climate",
 	"images": {
-		"large": "assets/images/large.jpg",
-		"small": "assets/images/small.jpg"
+		"large": "assets/images/large.png",
+		"small": "assets/images/small.png"
 	},
 	"drivers": [
 		{
@@ -53,6 +53,10 @@
 			},
 			"class": "sensor",
 			"capabilities": [ "measure_temperature" ],
+			"images": {
+				"large": "drivers/temperature/assets/images/large.png",
+				"small": "drivers/temperature/assets/images/small.png"
+			},
 			"pair": [
 				{
 					"id": "list_sensors",
@@ -75,6 +79,10 @@
 			},
 			"class": "sensor",
 			"capabilities": [ "measure_pressure" ],
+			"images": {
+				"large": "drivers/pressure/assets/images/large.png",
+				"small": "drivers/pressure/assets/images/small.png"
+			},
 			"pair": [
 				{
 					"id": "list_sensors",

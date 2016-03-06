@@ -20,5 +20,16 @@ module.exports = [
 			var ok = getGatewayConfig();
 			callback(null, ok);
         }
+    },
+    {
+        description: 'Get variables available for logging',
+        method: 'GET',
+        path: '/getLogVars/',
+        requires_authorizaton: false,
+        fn: function(callback, args) {
+            var getLoggableVars = Homey.app.api.getLoggableVars;
+			var ok = getLoggableVars();
+			callback(null, ok);
+        }
     }
 ];

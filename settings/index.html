@@ -35,6 +35,7 @@
 				$scope.invalidIp = false;
 				$scope.network = {};
 				$scope.features = {};
+				$scope.logging = {};
 				$scope.config = {};
 				$scope.timeout;
 				
@@ -50,11 +51,15 @@
 					}
 				}
 				
-				$scope.checkFound = function(found) {
-					$scope.foundOTG = found;
-					console.log("Found state " + found);
+				// Save network settings when OTG is found
+				$scope.checkFound = function(data) {
+					$scope.foundOTG = data.found;
+					console.log("Found state " + data.found);
+					// Use the ip & port on which OTG was found, or previous settings if not found
+					$scope.network.ip = data.ip || $scope.network.ip;
+					$scope.network.port = data.port || $scope.network.port;
 					var address = ' ' + $scope.network.ip + ':' + $scope.network.port;
-					if (found) {
+					if (data.found) {
 						console.log("Setting IP & port");
 						Homey.set('network', $scope.network);
 						$scope.message = __('settings.search.success', { addr: address });
@@ -67,34 +72,62 @@
 					$scope.$apply();
 				}
 				
-				// Read the network configuration
-				$scope.getNetworkConfig = function() {
-					console.log("In getNetworkConfig");
-					Homey.get('network', function(err, network) {
-						console.log("Getting network settings");
-						if (err) { 
-							return console.error('Could not get network settings', err);
-						}
-						$scope.network = network;
-						$scope.$apply();
-					});
-				}
-					
 				// Save the features
 				$scope.featureSave = function() {
 					// Store the feature settings
 					Homey.set('features', $scope.features);
 				};
 				
-				// Read the configuration setting (features, OTG)
-				$scope.getFeatureConfig = function() {
+				// Save with variables to log
+				$scope.loggingSave = function() {
+					// Add items to watch
+					for (var i in $scope.logitems) {
+						var item = $scope.logitems[i];
+						if (item.watching) {
+							$scope.logging[item.var] = item;
+						} else {
+							// Remove items currently being watched
+							if ($scope.logging[item.var] != null) {
+								delete($scope.logging[item.var]);
+							}
+						}
+					}
+					Homey.set('logging', $scope.logging);
+				};
+				
+				// Read the application settings
+				$scope.getAppSettings = function() {
+					Homey.get('network', function(err, network) {
+						if (err) { 
+							return console.error('Could not get network settings', err);
+						}
+						$scope.network = network;
+						$scope.$apply();
+					});
 					Homey.get('features', function(err, value) {
 						if (value) {
 							$scope.features = value;
 							$scope.$apply();
 						}
 					});
+					Homey.get('logging', function(err, value) {
+						if (value) {
+							$scope.logging = value;
+						}
+						Homey.api('GET', '/getLogVars/', {}, function(err, items) {
+							if (items) {
+								for (var i in items) {
+									// Mark the variables we are watching in our settings
+									items[i].watching = $scope.logging[items[i].var] != null;
+								}
+								$scope.logitems = items;
+								$scope.$apply();
+							}
+						});
+					});
 				}
+					
+				$scope.getAppSettings();
 
 				// Actions for back-end triggers
 				Homey.on('found_otg', $scope.checkFound);
@@ -104,10 +137,7 @@
 						$scope.$apply();
 					}
 				});
-
-				console.log("Retrieving network config");
-				$scope.getNetworkConfig();
-				$scope.getFeatureConfig();
+				// Get Gateway configuration
 				Homey.api('GET', '/getOtgConfig/', {}, function(err, config) {
 					if (config) {
 						$scope.config = config;
@@ -148,14 +178,25 @@
 				<legend data-i18n="settings.app.features.title"></legend>
 				<form ng-submit="featureSave()">
 					<div class="oneline" data-i18n="settings.app.features.set"></div>
-					<input type="radio" id="pset-on" value="1" ng-model="features.permanent"><label for="set-on" data-i18n="settings.app.features.seton"></label>
-					<input type="radio" id="pset-off" value="0" ng-model="features.permanent"><label for="set-off" data-i18n="settings.app.features.setoff"></label>
+					<input type="radio" id="pset-on" value="1" ng-model="features.permanent"><label for="pset-on" data-i18n="settings.app.features.seton"></label>
+					<input type="radio" id="pset-off" value="0" ng-model="features.permanent"><label for="pset-off" data-i18n="settings.app.features.setoff"></label>
 					<p></p>
 					<div class="oneline" data-i18n="settings.app.features.ventilation"></div>
-					<input type="radio" id="vset-on" value="1" ng-model="features.ventilation"><label for="set-on" data-i18n="settings.app.features.venton"></label>
-					<input type="radio" id="vset-off" value="0" ng-model="features.ventilation"><label for="set-off" data-i18n="settings.app.features.ventoff"></label>
+					<input type="radio" id="vset-on" value="1" ng-model="features.ventilation"><label for="vset-on" data-i18n="settings.app.features.venton"></label>
+					<input type="radio" id="vset-off" value="0" ng-model="features.ventilation"><label for="vset-off" data-i18n="settings.app.features.ventoff"></label>
 					<p></p>
 					<button type="submit" class="btn btn-default" ng-click="submitted=true;" data-i18n="settings.app.features.submit"></button>
+				</form>
+			</fieldset>
+			<p data-i18n="settings.app.logging.description"></p>
+			<fieldset>
+				<legend data-i18n="settings.app.logging.title"></legend>
+				<form name="loggingForm" ng-submit="loggingSave()">
+					<div ng-repeat="item in logitems">
+						<input type="checkbox" value="{{item.var}}" ng-model="item.watching"><label>{{item.txt}}</label>
+					</div>
+					<p></p>
+					<button type="submit" class="btn btn-default" ng-click="submitted=true;" data-i18n="settings.app.logging.submit"></button>
 				</form>
 			</fieldset>
 		</div>

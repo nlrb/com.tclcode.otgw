@@ -19,6 +19,11 @@
 				"venton": "Yes",
 				"ventoff": "No",
 				"submit": "Save feature settings"
+			},
+			"logging": {
+				"title": "Logging",
+				"description": "Select which OpenTherm values should be logged in Insights.",
+				"submit": "Save logging settings"
 			}
 		},
 		"gateway": {

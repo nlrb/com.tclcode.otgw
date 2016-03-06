@@ -19,6 +19,11 @@
 				"venton": "Ja",
 				"ventoff": "Nee",
 				"submit": "Sla mogelijkheden op"
+			},
+			"logging": {
+				"title": "Loggen",
+				"description": "Selecteer welke OpenTherm waardes bijgehouden worden in Inzichten.",
+				"submit": "Sla loginstellingen op"
 			}
 		},
 		"gateway": {

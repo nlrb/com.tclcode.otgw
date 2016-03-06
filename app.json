@@ -3,7 +3,7 @@
     "name": {
         "en": "OpenTherm Gateway"
     },
-    "version": "0.1.0",
+    "version": "0.5.0",
 	"compatibility": "*",
 	"description": {
 		"en": "Control your OpenTherm Gateway via Homey",
@@ -99,7 +99,204 @@
 		}
 	],
 	"flow": {
+		"triggers": [
+			{
+				"id": "status",
+				"title": {
+					"en": "Status flag gets",
+					"nl": "Statusvlag wordt"
+				},
+				"args": [
+					{
+						"name": "values",
+						"type": "dropdown",
+						"values": [
+							{
+								"id": "on",
+								"label": {
+										"en": "active",
+										"nl": "actief"
+								}
+							},
+							{
+								"id": "off",
+								"label": {
+										"en": "inactive",
+										"nl": "inactief"
+								}
+							}
+						]
+					}
+				],
+				"tokens": [
+					{
+						"name": "flag",
+						"title": { 
+							"en": "Status flag",
+							"nl": "Statusvlag"
+						}
+					}
+				]
+			},
+			{
+				"id": "faultcode",
+				"title": {
+					"en": "Boiler fault code gets",
+					"nl": "Ketelstoringscode wordt"
+				},
+				"args": [
+					{
+						"name": "values",
+						"type": "dropdown",
+						"values": [
+							{
+								"id": "on",
+								"label": {
+										"en": "active",
+										"nl": "actief"
+								}
+							},
+							{
+								"id": "off",
+								"label": {
+										"en": "inactive",
+										"nl": "inactief"
+								}
+							}
+						]
+					}
+				],
+				"tokens": [
+					{
+						"name": "OEM",
+						"title": { 
+							"en": "OEM code"
+						}
+					},
+					{
+						"name": "type",
+						"title": { 
+							"en": "Fault type",
+							"nl": "Type fout"
+						}
+					}
+				]
+			},
+			{
+				"id": "override",
+				"title": {
+					"en": "Room setpoint override gets",
+					"nl": "Overschrijven kamertemp. wordt"
+				},
+				"args": [
+					{
+						"name": "values",
+						"type": "dropdown",
+						"values": [
+							{
+								"id": "on",
+								"label": {
+										"en": "active",
+										"nl": "actief"
+								}
+							},
+							{
+								"id": "off",
+								"label": {
+										"en": "inactive",
+										"nl": "inactief"
+								}
+							}
+						]
+					}
+				],
+				"tokens": [
+					{
+						"name": "temp",
+						"title": { 
+							"en": "Temperature",
+							"nl": "Temperatuur"
+						}
+					}
+				]
+			},
+			{
+				"id": "command",
+				"title": {
+					"en": "Response received",
+					"nl": "Antwoord ontvangen"
+				},
+				"tokens": [
+					{
+						"name": "response",
+						"title": {
+							"en": "Response",
+							"nl": "Antwoord"
+						}
+					},
+					{
+						"name": "result",
+						"title": {
+							"en": "Result",
+							"nl": "Resultaat"
+						}
+					}
+				]
+			}
+		],
+		"conditions": [
+			{
+				"id": "override",
+				"title": {
+					"en": "Remote override is !{{active|inactive}}",
+					"nl": "Overschrijven kamertemperatuur is !{{aan|uit}}"
+				}
+			}
+		],
 		"actions": [
+			{
+				"id": "setHotWater",
+				"title": {
+					"en": "Set hot water mode",
+					"nl": "Zet tapwater mode"
+				},
+				"args": [
+					{
+						"name": "mode",
+						"type": "dropdown",
+						"values": [
+							{
+								"id": "thermostat",
+								"label": {
+										"en": "Thermostat controlled",
+										"nl": "Volg thermostaat"
+								}
+							},
+							{
+								"id": "on",
+								"label": {
+										"en": "Keep water hot",
+										"nl": "Hou water heet"
+								}
+							},
+							{
+								"id": "off",
+								"label": {
+										"en": "Don't pre-heat",
+										"nl": "Niet voorverwarmen"
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"id": "setClock",
+				"title": {
+					"en": "Set current thermostat time",
+					"nl": "Zet huidige tijd thermostaat"
+				}
+			},
 			{
 				"id": "setOutsideTemperature",
 				"title": {
@@ -129,6 +326,20 @@
 						"min": "0",
 						"max": "100",
 						"placeholder": { "en": "In percent", "nl": "Als percentage" }
+					}
+				]
+			},
+			{
+				"id": "sendCommand",
+				"title": {
+					"en": "Send Gateway command",
+					"nl": "Verstuur commando"
+				},
+				"args": [
+					{
+						"name": "command",
+						"type": "text",
+						"placeholder": { "en": "e.g. PR=A" }
 					}
 				]
 			}

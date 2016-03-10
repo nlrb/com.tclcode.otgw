@@ -181,15 +181,26 @@ function init() {
 								// TODO: add booleans (not supported by Homey Insights at the moment)
 								var type = 'number';
 								var unit = '';
+								var decimals = (info.val == 'f8.8') ? 2 : 0;
 								if (info.sensor != null) {
 									unit = units[info.sensor];
 								}
-								Homey.manager('insights').createLog(l, label, type, unit, function(err, success) {
-									otgw.debug('createLog for ' + l + ': ' + err + ' ' + success);
-									if (success) {
-										otgw.registerWatch(l, l, insightsHandler);
-									}
-								})
+								if (!Homey.version) {
+									Homey.manager('insights').createLog(l, label, type, unit, function(err, success) {
+										otgw.debug('createLog for ' + l + ': ' + err + ' ' + success);
+										if (success) {
+											otgw.registerWatch(l, l, insightsHandler);
+										}
+									})
+								} else { // Version 0.8.23 or higher
+									var options = { label: label, type: type, units: unit, decimals: decimals };
+									Homey.manager('insights').createLog(l, options, function(err, logObj) {
+										otgw.debug('createLog for ' + l + ': ' + err);
+										if (!err) {
+											otgw.registerWatch(l, l, insightsHandler);
+										}
+									})
+								}
 							} else {
 								otgw.debug("How can we log " + l + " if it doesn't exist?");
 							}

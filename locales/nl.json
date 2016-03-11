@@ -18,12 +18,14 @@
 				"ventilation": "Emuleer ventilatieondesteuning voor vochtigheidsensor?",
 				"venton": "Ja",
 				"ventoff": "Nee",
-				"submit": "Sla mogelijkheden op"
+				"submit": "Sla mogelijkheden op",
+				"success": "Mogelijkheden zijn opgeslagen."
 			},
 			"logging": {
 				"title": "Loggen",
 				"description": "Selecteer welke OpenTherm waardes bijgehouden worden in Inzichten.",
-				"submit": "Sla loginstellingen op"
+				"submit": "Sla loginstellingen op",
+				"success": "Loginstellingen zijn opgeslagen."
 			}
 		},
 		"gateway": {

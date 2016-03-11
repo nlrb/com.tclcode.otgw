@@ -132,6 +132,7 @@ The following actions are supported.
 See the settings section on how to configure [logging](Logging) to Homey Insights.
 
 ### Versions
+* 0.5.1 Bug fix, improved settings page
 * 0.5.0 Second app-store release - adds better flow support, insights logging & re-connect
 * 0.1.0 First app-store release - added gateway config (RO), language support, flow actions, fixes/refactoring
 * 0.0.2 Second release - added pressure sensor, 2nd thermostat, flags, fixes & code refactoring

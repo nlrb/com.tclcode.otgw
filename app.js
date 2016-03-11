@@ -175,7 +175,7 @@ function init() {
 						// Add entries (even if they exist)
 						// Workaround for async callbacks; hence needs separate function
 						Object.keys(logging).forEach(function(l) {
-							var info = otgw.getVarDetails(l);
+							var info = otgw.getVarDetails(l).data;
 							if (info != null) {
 								var label = { en: info.en, nl: info.nl };
 								// TODO: add booleans (not supported by Homey Insights at the moment)

@@ -18,12 +18,14 @@
 				"ventilation": "Fake ventilation support for humidity sensor?",
 				"venton": "Yes",
 				"ventoff": "No",
-				"submit": "Save feature settings"
+				"submit": "Save feature settings",
+				"success": "Feature settings have been saved."
 			},
 			"logging": {
 				"title": "Logging",
 				"description": "Select which OpenTherm values should be logged in Insights.",
-				"submit": "Save logging settings"
+				"submit": "Save logging settings",
+				"success": "Logging settings have been saved."
 			}
 		},
 		"gateway": {

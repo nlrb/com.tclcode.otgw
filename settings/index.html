@@ -2,6 +2,10 @@
 <html>
 	<head>
 		<style>
+			.message {
+				background: #f8f8f8;
+				display: none;
+			}
 			.message-bar {
 				font-style: italic;
 				font-weight: bolder;
@@ -28,9 +32,8 @@
 		<script type="text/javascript" src="/manager/webserver/assets/js/angular.js"></script>
 		<script>
 			angular.module('OtgSettingsApp', [])
-			.controller('SettingsCtrl', ['$scope', function($scope) {
+			.controller('SettingsCtrl', ['$scope', '$timeout', function($scope, $timeout) {
 				$scope.foundOTG = false;
-				$scope.messageActive = false;
 				$scope.message = '';
 				$scope.invalidIp = false;
 				$scope.network = {};
@@ -38,44 +41,61 @@
 				$scope.logging = {};
 				$scope.config = {};
 				$scope.timeout;
+				$scope.msgPromise;
+				
+				// Display message to the user
+				$scope.displayMessage = function(text) {
+					if ($scope.msgPromise != null) {
+						$timeout.cancel($scope.msgPromise);
+					}
+					$scope.$apply(function() {
+						$scope.message = text;
+					});
+					$(".message").slideDown();
+					$scope.msgPromise = $timeout(function() {
+						$scope.message = '';
+						$(".message").slideUp();
+					}, 5000);
+				}
 				
 				// Save the network configuration
 				$scope.networkSave = function(form) {
 					if (form.$valid) {
-						console.log('Saving network settings');
 						var address = ' ' + $scope.network.ip + ':' + $scope.network.port;
-						$scope.message = __('settings.search.title', { addr: address });
-						$scope.messageActive = true;
 						// Search for OTG
-						Homey.api('PUT', '/search/', { 'ip': $scope.network.ip, 'port': $scope.network.port }, function(err, ok) {});
+						Homey.api('PUT', '/search/', { 'ip': $scope.network.ip, 'port': $scope.network.port }, function(err, ok) {
+							if (ok) {
+								$scope.displayMessage(__('settings.search.title', { addr: address }));
+							}
+						});
 					}
 				}
 				
 				// Save network settings when OTG is found
 				$scope.checkFound = function(data) {
 					$scope.foundOTG = data.found;
-					console.log("Found state " + data.found);
 					// Use the ip & port on which OTG was found, or previous settings if not found
 					$scope.network.ip = data.ip || $scope.network.ip;
 					$scope.network.port = data.port || $scope.network.port;
 					var address = ' ' + $scope.network.ip + ':' + $scope.network.port;
 					if (data.found) {
-						console.log("Setting IP & port");
 						Homey.set('network', $scope.network);
-						$scope.message = __('settings.search.success', { addr: address });
+						$scope.displayMessage(__('settings.search.success', { addr: address }));
 					} else {
-						console.log("Failure :-(");
 						$scope.network = {};
 						$scope.networkForm.$setPristine();
-						$scope.message = __('settings.search.failed', { addr: address });
+						$scope.displayMessage(__('settings.search.failed', { addr: address }));
 					}
-					$scope.$apply();
 				}
 				
 				// Save the features
 				$scope.featureSave = function() {
 					// Store the feature settings
-					Homey.set('features', $scope.features);
+					Homey.set('features', $scope.features, function(err, value) {
+						if (!err) {
+							$scope.displayMessage(__('settings.app.features.success'));
+						}
+					});
 				};
 				
 				// Save with variables to log
@@ -92,7 +112,11 @@
 							}
 						}
 					}
-					Homey.set('logging', $scope.logging);
+					Homey.set('logging', $scope.logging, function(err, value) {
+						if (!err) {
+							$scope.displayMessage(__('settings.app.logging.success'));
+						}
+					});
 				};
 				
 				// Read the application settings
@@ -154,7 +178,7 @@
 	</head>
 
 	<body ng-controller="SettingsCtrl">
-		<fieldset ng-show="messageActive" style="background: #f8f8f8">
+		<fieldset id="message" class="message">
 			<legend>Message</legend>
 			<div class="message-bar">
 				{{message}}
@@ -192,7 +216,7 @@
 			<fieldset>
 				<legend data-i18n="settings.app.logging.title"></legend>
 				<form name="loggingForm" ng-submit="loggingSave()">
-					<div ng-repeat="item in logitems">
+					<div ng-repeat="item in logitems | orderBy: 'id'">
 						<input type="checkbox" value="{{item.var}}" ng-model="item.watching"><label>{{item.txt}}</label>
 					</div>
 					<p></p>

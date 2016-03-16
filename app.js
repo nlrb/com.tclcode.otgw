@@ -24,7 +24,9 @@ function insightsHandler(id, data) {
 	var value = data.newRawValue;
 	// TODO: Make boolean events
 	otgw.debug('Logging to Insights: ' + data.name + ' = ' + value);
-	Homey.manager('insights').createEntry(data.name, value);
+	Homey.manager('insights').createEntry(data.name, Number(value), null, function(err, success) {
+		otgw.debug('Insights ' + err + ' : ' + success);
+	});
 }
 
 // Handler for status changes

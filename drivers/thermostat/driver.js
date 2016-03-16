@@ -23,7 +23,7 @@ var self = module.exports = {
 						if (val == null || val == '0.00') {
 							val = otgw.getValue('target_temperature', 'CurrentSetpoint');
 						}
-						callback(null, val);
+						callback(null, Number(val));
 					}
 			},
 			set: function(device, target_temperature, callback) {
@@ -33,13 +33,13 @@ var self = module.exports = {
 				
 				var tt = Math.round(target_temperature * 2) / 2;
 				otgw.setTargetTemp(device, tt);
-				self.realtime(device, 'target_temperature', tt);
+				self.realtime(device, 'target_temperature', Number(tt));
 			}
 		},
 		measure_temperature: {
 			get: function(device, callback) {
 					if (typeof callback == 'function') {
-						callback(null, otgw.getValue('measure_temperature', 'CurrentTemperature'));
+						callback(null, Number(otgw.getValue('measure_temperature', 'CurrentTemperature')));
 					}
 			}
 		},

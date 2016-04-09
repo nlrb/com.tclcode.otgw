@@ -20,10 +20,10 @@ var self = module.exports = {
 			get: function(device, callback) {
 					if (typeof callback == 'function') {
 						var val = otgw.getValue('target_temperature', 'RemoteOverrideRoomSetpoint');
-						if (val == null || val == '0.00') {
+						if (val == null || val == 0) {
 							val = otgw.getValue('target_temperature', 'CurrentSetpoint');
 						}
-						callback(null, Number(val));
+						callback(null, val);
 					}
 			},
 			set: function(device, target_temperature, callback) {
@@ -33,13 +33,13 @@ var self = module.exports = {
 				
 				var tt = Math.round(target_temperature * 2) / 2;
 				otgw.setTargetTemp(device, tt);
-				self.realtime(device, 'target_temperature', Number(tt));
+				self.realtime(device, 'target_temperature', tt);
 			}
 		},
 		measure_temperature: {
 			get: function(device, callback) {
 					if (typeof callback == 'function') {
-						callback(null, Number(otgw.getValue('measure_temperature', 'CurrentTemperature')));
+						callback(null, otgw.getValue('measure_temperature', 'CurrentTemperature'));
 					}
 			}
 		},

@@ -23,14 +23,12 @@ When a temperature change on the thermostat device is made, either a 'TC' or 'TT
 **Please note that not all thermostats support these commands. Check the [Equipment matrix](http://otgw.tclcode.com/matrix.cgi#thermostats "Equipment matrix") on the OTG website for message 9 and 100.**
 
 The second option allows you to have the app send a 'SR=70:0,0' command. This results the thermostat believing that a ventilation device is supported. Some thermostats (like e.g. the Honeywell Chronotherm Modulation) can show the air humidity. But it will show it only when this option is set to 'Yes'. You can send a humidity value to the OTG via a Homey Flow card.
-##### Logging
+##### <a name="Logging"></a>Logging
 All values changes that occur between master and slave can be logged in Homey Insights. However, only messages that are supported by the boiler and/or thermostat will show up in the list. When fist starting up, it will take some time before the app knows which messages give valid values. So make sure the app is running for some time before configuring the values to be logged.
 
 ![](http://homey.ramonbaas.nl/settings_logging.png)
 
 Also note that for some values you can choose to create a device. When creating a device the value changes will by default be logged to Insights. So you could log them twice. Hence the advice is to only log values for which no device exists.
-
-*Note*: At the moment binary (on/off) values will be logged as '0' and '1', as Homey Insights does not yet support boolean values.
 
 #### Gateway configuration
 ##### Device settings
@@ -128,10 +126,19 @@ The following actions are supported.
 
     ![](http://homey.ramonbaas.nl/action_humidity.png)
 
+### Speech
+You can ask Homey a number of questions related to the thermostat or boiler, e.g.
+* "What is the room temperature?"
+* "What is the target temperature?"
+* "Is there a boiler problem?"
+* "What is the boiler pressure?"
+* "What is the boiler water temperature?"
+
 ### Insights
-See the settings section on how to configure [logging](Logging) to Homey Insights.
+See the settings section on how to configure [logging](#Logging) to Homey Insights.
 
 ### Versions
+* 0.6.0 Added speech, using booleans for Insights, fix override temperature display
 * 0.5.2 Fixes for API changes of Homey FW 0.8.24
 * 0.5.1 Bug fix, improved settings page
 * 0.5.0 Second app-store release - adds better flow support, insights logging & re-connect

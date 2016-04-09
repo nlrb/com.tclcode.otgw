@@ -22,10 +22,9 @@ var faultVars = otgw.getFlagVars('FaultFlags');
 // Insights handler
 function insightsHandler(id, data) {
 	var value = data.newRawValue;
-	// TODO: Make boolean events
 	otgw.debug('Logging to Insights: ' + data.name + ' = ' + value);
-	Homey.manager('insights').createEntry(data.name, Number(value), null, function(err, success) {
-		otgw.debug('Insights ' + err + ' : ' + success);
+	Homey.manager('insights').createEntry(data.name, value, null, function(err, success) {
+		if (err) { otgw.debug('! Insights ' + err + ' (' + typeof value + ')'); }
 	});
 }
 
@@ -73,6 +72,53 @@ var flow = {
 	response: { var: 'CommandResponse', handler: responseHandler }
 };
 
+// Default handler for speech input: talk back
+function defaultSpeechHandler(id) {
+	var val = otgw.getValue(speech[id].capability, speech[id].var);
+	if (val == null) {
+		otgw.debug(__('speech.dont_know'));
+		Homey.manager('speech-output').say(__('speech.dont_know'));
+	} else {
+		val = val.toFixed(1);
+		otgw.debug(__('speech.' + speech[id].text, { arg: val }));
+		Homey.manager('speech-output').say(__('speech.' + speech[id].text, { arg: val }));
+	}
+}
+
+// Handler for boiler error question
+function faultSpeechHandler(id) {
+	var errors = '';
+	var cnt = 0;
+	for (var i in speech[id].var) {
+		if (otgw.getValue(null, i)) {
+			errors += speech[id].var[i].txt[locale] + ' & ';
+			cnt++;
+		}
+	}
+	if (cnt == 0) {
+		otgw.debug(__('speech.no_error'));
+		Homey.manager('speech-output').say(__('speech.no_error'));
+	} else {
+		errors = errors.slice(0, -3); // remove last ' & ';
+		var txt;
+		if (cnt == 1) {
+			txt = __('speech.has_error', { cnt: cnt, error: errors });
+		} else {
+			txt = __('speech.has_errors', { cnt: cnt, errors: errors });
+		}
+		otgw.debug(txt);
+		Homey.manager('speech-output').say(txt);
+	}
+}
+
+// Speech ids and actions
+var speech = [
+	{ says: ['room', 'temp'], var: 'CurrentTemperature', capability: 'measure_temperature', text: 'room_temp' },
+	{ says: ['target', 'temp'], var: 'CurrentSetpoint', capability: 'measure_temperature', text: 'room_target' },
+	{ says: ['boiler', 'temp'], var: 'BoilerWaterTemperature', capability: 'measure_temperature', text: 'boiler_temp' },
+	{ says: ['boiler', 'pressure'], var: 'CHWaterPressure', text: 'pressure' },
+	{ says: ['wrong', 'boiler'], var: faultVars, handler: faultSpeechHandler }
+]
 
 // Start of the app
 function init() {
@@ -150,6 +196,29 @@ function init() {
 				var ok = otgw.sendCommand(args.command);
 				callback(null, ok);
 			});
+
+			// Register speech action
+			Homey.manager('speech-input').on('speech', function(list, callback) {
+				var matched = false;
+				otgw.debug('Received speech trigger');
+				for (var i = 0; i < speech.length; i++) {
+					var match = 0;
+					list.triggers.forEach(function(trigger) {
+						for (var m = 0; m < speech[i].says.length; m++) {
+							if (trigger.id == speech[i].says[m]) {
+								match++;
+							}
+						}
+					});
+					matched = match == speech[i].says.length;
+					if (matched) {
+						otgw.debug('Match on ' + speech[i].says);
+						var handler = speech[i].handler || defaultSpeechHandler;
+						handler(i);
+					}
+				}
+				callback(matched ? null : true, matched ? true : null);
+			});
 			
 			// Catch update of settings
 			Homey.manager('settings').on('set', function(varName) {
@@ -176,37 +245,29 @@ function init() {
 						}
 						// Add entries (even if they exist)
 						// Workaround for async callbacks; hence needs separate function
-						Object.keys(logging).forEach(function(l) {
+						for (var l in logging) {
 							var info = otgw.getVarDetails(l).data;
 							if (info != null) {
 								var label = { en: info.en, nl: info.nl };
-								// TODO: add booleans (not supported by Homey Insights at the moment)
-								var type = 'number';
+								// Assumption: flags don't specify 'val' field
+								var type = info.val == null ? 'boolean' : 'number';
 								var unit = '';
 								var decimals = (info.val == 'f8.8') ? 2 : 0;
 								if (info.sensor != null) {
 									unit = units[info.sensor];
 								}
-								if (!Homey.version) {
-									Homey.manager('insights').createLog(l, label, type, unit, function(err, success) {
-										otgw.debug('createLog for ' + l + ': ' + err + ' ' + success);
-										if (success) {
-											otgw.registerWatch(l, l, insightsHandler);
-										}
-									})
-								} else { // Version 0.8.23 or higher
-									var options = { label: label, type: type, units: unit, decimals: decimals };
-									Homey.manager('insights').createLog(l, options, function(err, logObj) {
-										otgw.debug('createLog for ' + l + ': ' + err);
-										if (!err) {
-											otgw.registerWatch(l, l, insightsHandler);
-										}
-									})
-								}
+								// Version 0.8.23 or higher
+								var options = { label: label, type: type, units: unit, decimals: decimals };
+								Homey.manager('insights').createLog(l, options, function(err, logObj) {
+									if (!err) {
+										otgw.debug('createLog adding watch for ' + logObj.name);
+										otgw.registerWatch(logObj.name, logObj.name, insightsHandler);
+									}
+								})
 							} else {
 								otgw.debug("How can we log " + l + " if it doesn't exist?");
 							}
-						});
+						}
 					});
 				}
 			});

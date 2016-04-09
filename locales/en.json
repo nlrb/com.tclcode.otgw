@@ -40,5 +40,15 @@
 			"success": "Found your OpenTherm Gateway. Settings have been saved.",
 			"failed": "Unable to locate the OpenTherm Gateway on __addr__!"
 		}
+	},
+	"speech": {
+		"room_temp": "The room temperature is now __arg__ degrees.",
+		"room_target": "The thermostat target temperature is set to __arg__ degrees.",
+		"boiler_temp": "The boiler water temperature is now __arg__ degrees.",
+		"pressure": "The boiler water pressure is now __arg__ bar.",
+		"dont_know": "I'm sorry. I don't have that information.",
+		"no_error": "As far as I'm aware, the boiler is working perfectly fine.",
+		"has_error": "The boiler reports a __error__.",
+		"has_errors": "The boiler has __cnt__ errors, namely __errors__."
 	}
 }

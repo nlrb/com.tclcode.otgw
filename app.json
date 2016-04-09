@@ -3,8 +3,8 @@
     "name": {
         "en": "OpenTherm Gateway"
     },
-    "version": "0.5.2",
-	"compatibility": "*",
+    "version": "0.6.0",
+	"compatibility": ">=0.8.27",
 	"description": {
 		"en": "Control your OpenTherm Gateway via Homey",
 		"nl": "Bestuur je OpenTherm Gateway met Homey"
@@ -345,6 +345,62 @@
 			}
 		]
     },
+	"permissions": [
+        "homey:manager:speech-output"
+    ],
+	"speech": [
+		{
+			"id": "temp",
+			"importance": 0.5,
+			"triggers": {
+				"en": [ "temperature" ],
+				"nl": [ "temperatuur" ]
+			}
+		},
+		{
+			"id": "room",
+			"importance": 0.5,
+			"triggers": {
+				"en": [ "room" ],
+				"nl": [ "kamer" ]
+			}
+		},
+		{
+			"id": "boiler",
+			"importance": 0.5,
+			"triggers": {
+				"en": [ "boiler" ],
+				"nl": [ "ketel" ]
+			}
+		},
+		{
+			
+			"id": "wrong",
+			"importance": 0.5,
+			"triggers": {
+				"en": [ "wrong", "broken", "error", "fault", "problem" ],
+				"nl": [ "fout", "kapot", "probleem" ]
+			}
+		},
+		{
+			
+			"id": "pressure",
+			"importance": 0.4,
+			"triggers": {
+				"en": [ "pressure" ],
+				"nl": [ "druk" ]
+			}
+		},
+		{
+			
+			"id": "target",
+			"importance": 0.5,
+			"triggers": {
+				"en": [ "target" ],
+				"nl": [ "doel" ]
+			}
+		}
+	],
 	"dependencies": {
 		"otg-api": "*"
 	}

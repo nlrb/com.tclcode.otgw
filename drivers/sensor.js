@@ -21,7 +21,7 @@ function createSensorDriver(driver) {
 				get: function(device, callback) {
 						// Assumption: sensor devices have only one value
 						if (typeof callback == 'function') {
-							callback(null, Number(otgw.getValue('measure_temperature', device.watch[0].variable)));
+							callback(null, otgw.getValue('measure_temperature', device.watch[0].variable));
 						}
 				}
 			},
@@ -29,7 +29,7 @@ function createSensorDriver(driver) {
 				get: function(device, callback) {
 						// Assumption: sensor devices have only one value
 						if (typeof callback == 'function') {
-							callback(null, Number(otgw.getValue('measure_pressure', device.watch[0].variable)));
+							callback(null, otgw.getValue('measure_pressure', device.watch[0].variable));
 						}
 				}
 			}

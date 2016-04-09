@@ -40,5 +40,15 @@
 			"success": "De OpenTherm Gateway is gevonden. De instellingen zijn opgeslagen.",
 			"failed": "De OpenTherm Gateway kan niet gevonden worden op __addr__!"
 		}
+	},
+	"speech": {
+		"room_temp": "De kamertemperatuur is nu __arg__ graden.",
+		"room_target": "De thermostaat staat ingesteld op __arg__ graden.",
+		"boiler_temp": "De ketelwatertemperatuur is nu __arg__ graden.",
+		"pressure": "De keteldruk is nu __arg__ bar.",
+		"dont_know": "Het spijt me, maar dat weet ik niet.",
+		"no_error": "Voor zover ik weet werkt de ketel naar behoren.",
+		"has_error": "De ketel raporteert een __error__.",
+		"has_errors": "De ketel heeft __cnt__ foutmeldingen, namelijk __errors__."
 	}
 }

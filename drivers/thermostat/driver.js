@@ -42,29 +42,6 @@ var self = module.exports = {
 						callback(null, otgw.getValue('measure_temperature', 'CurrentTemperature'));
 					}
 			}
-		},
-		thermostat_mode: {
-			get: function(device, callback) {
-					if (typeof callback == 'function') {
-						otgw.debug('thermostat_mode: get');
-						callback(null, otgw.getThermostatMode());
-					}
-			},
-			set: function(device, target_mode, callback) {
-					if (typeof callback == 'function') {
-						otgw.debug('thermostat_mode: set' + target_mode);
-						otgw.setThermostatMode(target_mode);
-						callback(null, target_mode);
-					}
-			}
-		},
-		thermostat_state: {
-			get: function(device, callback) {
-					if (typeof callback == 'function') {
-						otgw.debug(otgw.getThermostatState(device));
-						callback(null, otgw.getThermostatState(device));
-					}
-			}
 		}
 	},
 	

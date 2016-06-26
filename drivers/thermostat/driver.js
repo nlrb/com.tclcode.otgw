@@ -34,6 +34,7 @@ var self = module.exports = {
 				var tt = Math.round(target_temperature * 2) / 2;
 				otgw.setTargetTemp(device, tt);
 				self.realtime(device, 'target_temperature', tt);
+				callback();
 			}
 		},
 		measure_temperature: {
@@ -58,14 +59,51 @@ var self = module.exports = {
 					}
 			}
 		},
-		thermostat_state: {
+		flame_on: {
 			get: function(device, callback) {
 					if (typeof callback == 'function') {
-						otgw.debug(otgw.getThermostatState(device));
-						callback(null, otgw.getThermostatState(device));
+						var flame = otgw.getThermostatState(device, 'flame_on')
+						otgw.debug(flame);
+						callback(flame.err, flame.state);
 					}
 			}
-		}
+		},
+		heating_on: {
+			get: function(device, callback) {
+					if (typeof callback == 'function') {
+						var heating = otgw.getThermostatState(device, 'heating_on')
+						otgw.debug(heating);
+						callback(heating.err, heating.state);
+					}
+			}
+		},
+		cooling_on: {
+			get: function(device, callback) {
+					if (typeof callback == 'function') {
+						var cooling = otgw.getThermostatState(device, 'cooling_on')
+						otgw.debug(cooling);
+						callback(cooling.err, cooling.state);
+					}
+			}
+		},
+		heating_water: {
+			get: function(device, callback) {
+					if (typeof callback == 'function') {
+						var heating = otgw.getThermostatState(device, 'heating_water')
+						otgw.debug(heating);
+						callback(heating.err, heating.state);
+					}
+			}
+		},
+		fault: {
+			get: function(device, callback) {
+					if (typeof callback == 'function') {
+						var fault = otgw.getThermostatState(device, 'fault')
+						otgw.debug(fault);
+						callback(fault.err, fault.state);
+					}
+			}
+		},
 	},
 	
 	deleted: function(device_data) {

@@ -3,7 +3,7 @@
     "name": {
         "en": "OpenTherm Gateway"
     },
-    "version": "0.6.0",
+    "version": "0.6.1",
 	"compatibility": ">=0.8.27",
 	"description": {
 		"en": "Control your OpenTherm Gateway via Homey",
@@ -26,7 +26,7 @@
 				"nl": "Thermostaat"
 			},
 			"class": "thermostat",
-			"capabilities": [ "target_temperature", "measure_temperature", "thermostat_mode", "thermostat_state" ],
+			"capabilities": [ "target_temperature", "measure_temperature", "thermostat_mode" ],
 			"images": {
 				"large": "drivers/thermostat/assets/images/large.png",
 				"small": "drivers/thermostat/assets/images/small.png"

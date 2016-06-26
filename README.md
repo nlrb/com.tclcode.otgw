@@ -138,6 +138,7 @@ You can ask Homey a number of questions related to the thermostat or boiler, e.g
 See the settings section on how to configure [logging](#Logging) to Homey Insights.
 
 ### Versions
+* 0.6.1 Custom state capability added since Athom removed the 'thermostat_state' device capability
 * 0.6.0 Added speech, using booleans for Insights, fix override temperature display
 * 0.5.2 Fixes for API changes of Homey FW 0.8.24
 * 0.5.1 Bug fix, improved settings page

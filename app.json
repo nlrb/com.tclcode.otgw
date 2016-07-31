@@ -3,7 +3,7 @@
     "name": {
         "en": "OpenTherm Gateway"
     },
-    "version": "0.6.1",
+    "version": "0.6.2",
 	"compatibility": ">=0.9.1",
 	"description": {
 		"en": "Control your OpenTherm Gateway via Homey",

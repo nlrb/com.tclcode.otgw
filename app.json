@@ -4,7 +4,7 @@
         "en": "OpenTherm Gateway"
     },
     "version": "0.6.1",
-	"compatibility": ">=0.8.27",
+	"compatibility": ">=0.9.1",
 	"description": {
 		"en": "Control your OpenTherm Gateway via Homey",
 		"nl": "Bestuur je OpenTherm Gateway met Homey"
@@ -18,6 +18,38 @@
 		"large": "assets/images/large.png",
 		"small": "assets/images/small.png"
 	},
+	"capabilities": {
+		"flame_on": {
+			"type": "boolean", 
+			"title": { "en": "Flame on", "nl": "Vlam aan" },
+			"getable": true, 
+			"setable": false 
+		},
+		"heating_on": {
+			"type": "boolean", 
+			"title": { "en": "Heating on", "nl": "Verwarming aan" },
+			"getable": true, 
+			"setable": false 
+		},
+		"cooling_on": {
+			"type": "boolean", 
+			"title": { "en": "Cooling on", "nl": "Koelen aan" },
+			"getable": true, 
+			"setable": false 
+		},
+		"heating_water": { 
+			"type": "boolean", 
+			"title": { "en": "Heating water", "nl": "Water verwarmen" },
+			"getable": true, 
+			"setable": false 
+		},
+		"fault": {
+			"type": "boolean", 
+			"title": { "en": "Fault", "nl": "Fout" },
+			"getable": true, 
+			"setable": false 
+		}
+	},
 	"drivers": [
 		{
 			"id": "thermostat",
@@ -26,7 +58,16 @@
 				"nl": "Thermostaat"
 			},
 			"class": "thermostat",
-			"capabilities": [ "target_temperature", "measure_temperature", "thermostat_mode" ],
+			"capabilities": [ 
+				"target_temperature", 
+				"measure_temperature", 
+				"thermostat_mode",
+				"flame_on",
+				"heating_on",
+				"cooling_on",
+				"heating_water",
+				"fault"
+			],
 			"images": {
 				"large": "drivers/thermostat/assets/images/large.png",
 				"small": "drivers/thermostat/assets/images/small.png"

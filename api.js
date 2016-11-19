@@ -22,10 +22,20 @@ module.exports = [
         }
     },
     {
+        description: 'Get OTG variables',
+        method: 'GET',
+        path: '/getOtgVars/',
+        requires_authorizaton: false,
+        fn: function(callback, args) {
+			var result = Homey.app.api.getGatewayVariables();
+			callback(null, result);
+        }
+    },
+    {
         description: 'Get variables available for logging',
         method: 'GET',
         path: '/getLogVars/',
-        requires_authorizaton: false,
+        requires_authorizaton: true,
         fn: function(callback, args) {
             var getLoggableVars = Homey.app.api.getLoggableVars;
 			var ok = getLoggableVars();

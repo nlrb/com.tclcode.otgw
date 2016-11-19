@@ -280,6 +280,7 @@ var api = {
 	openComm: otgw.openComm,
 	setFeatures: otgw.setFeatures,
 	getGatewayConfig: otgw.getGatewayConfig,
+	getGatewayVariables: otgw.getGatewayVariables,
 	getLoggableVars: otgw.getLoggableVars
 }
 

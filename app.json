@@ -3,14 +3,14 @@
     "name": {
         "en": "OpenTherm Gateway"
     },
-    "version": "0.6.2",
-	"compatibility": ">=0.9.1",
+    "version": "1.0.0",
+	"compatibility": ">=1.0.0",
 	"description": {
 		"en": "Control your OpenTherm Gateway via Homey",
 		"nl": "Bestuur je OpenTherm Gateway met Homey"
 	},
 	"author": {
-		"name": "Ramon Baas",
+		"name": "Ramón Baas",
 		"website": "http://otgw.tclcode.com/"
 	},
 	"category": "climate",
@@ -348,8 +348,8 @@
 					{
 						"name": "temperature",
 						"type": "number",
-						"min": "-20",
-						"max": "40",
+						"min": -20,
+						"max": 40,
 						"placeholder": { "en": "In degree celcius", "nl": "In graden celcius" }
 					}
 				]
@@ -364,8 +364,8 @@
 					{
 						"name": "humidity",
 						"type": "number",
-						"min": "0",
-						"max": "100",
+						"min": 0,
+						"max": 100,
 						"placeholder": { "en": "In percent", "nl": "Als percentage" }
 					}
 				]
@@ -395,7 +395,7 @@
 			"importance": 0.5,
 			"triggers": {
 				"en": [ "temperature" ],
-				"nl": [ "temperatuur" ]
+				"nl": [ "temperatuur", "kamertemperatuur" ]
 			}
 		},
 		{
@@ -403,7 +403,7 @@
 			"importance": 0.5,
 			"triggers": {
 				"en": [ "room" ],
-				"nl": [ "kamer" ]
+				"nl": [ "kamer", "kamertemperatuur" ]
 			}
 		},
 		{
@@ -411,7 +411,7 @@
 			"importance": 0.5,
 			"triggers": {
 				"en": [ "boiler" ],
-				"nl": [ "ketel" ]
+				"nl": [ "ketel", "boiler" ]
 			}
 		},
 		{

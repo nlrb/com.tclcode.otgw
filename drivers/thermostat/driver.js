@@ -53,9 +53,9 @@ var self = module.exports = {
 			},
 			set: function(device, target_mode, callback) {
 					if (typeof callback == 'function') {
-						otgw.debug('thermostat_mode: set' + target_mode);
-						otgw.setThermostatMode(target_mode);
-						callback(null, target_mode);
+						otgw.debug('thermostat_mode: set ' + target_mode);
+						let ok = otgw.setThermostatMode(target_mode);
+						callback(ok ? null : 'Error', ok ? target_mode : null);
 					}
 			}
 		},

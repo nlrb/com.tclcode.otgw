@@ -147,10 +147,18 @@ You can ask Homey a number of questions related to the thermostat or boiler, e.g
 See the settings section on how to configure [logging](#Logging) to Homey Insights.
 
 ### API
-To enable usage of the values read from the OpenTherm Gateway outside of the app, there is an API function that returns all values read in a JSON format. This is the function `getOtgwVars` and can be used unauthenticated. 
+To enable usage of the values read from the OpenTherm Gateway outside of the app, there is are 2 API function available. They can be used unauthenticated.
 
-An example how to invoke it from the console is:
-`api('GET', '/app/com.tclcode.otgw/getOtgVars', function(err, x) { console.log(x) })`
+* `getOtgwConfig`: returns the configuration settings of the OpenTherm Gateway
+* `getOtgwVars`: returns all values read from the OpenTherm Gateway
+
+##### Examples
+An example how to invoke `getOtgwVars`
+
+* from the console (returns object):
+`api('GET', '/app/com.tclcode.otgw/getOtgwVars', function(err, x) { console.log(x) })`
+* direct URL (returns JSON):
+`<homey_ip>/api/app/com.tclcode.otgw/getOtgwVars`
 
 
 ### Versions

@@ -161,7 +161,7 @@
 					}
 				});
 				// Get Gateway configuration
-				Homey.api('GET', '/getOtgConfig/', {}, function(err, config) {
+				Homey.api('GET', '/getOtgwConfig/', {}, function(err, config) {
 					if (config) {
 						$scope.config = config;
 						$scope.$apply();

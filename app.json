@@ -387,6 +387,7 @@
 		]
     },
 	"permissions": [
+        "homey:manager:speech-input",
         "homey:manager:speech-output"
     ],
 	"speech": [
@@ -395,7 +396,7 @@
 			"importance": 0.5,
 			"triggers": {
 				"en": [ "temperature" ],
-				"nl": [ "temperatuur", "kamertemperatuur" ]
+				"nl": [ "temperatuur", "kamertemperatuur", "watertemperatuur" ]
 			}
 		},
 		{

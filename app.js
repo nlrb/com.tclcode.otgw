@@ -73,31 +73,31 @@ var flow = {
 };
 
 // Default handler for speech input: talk back
-function defaultSpeechHandler(id) {
-	var val = otgw.getValue(speech[id].capability, speech[id].var);
+function defaultSpeechHandler(id, speech) {
+	var val = otgw.getValue(speechInfo[id].capability, speechInfo[id].var);
 	if (val == null) {
 		otgw.debug(__('speech.dont_know'));
-		Homey.manager('speech-output').say(__('speech.dont_know'));
+		speech.say(__('speech.dont_know'));
 	} else {
 		val = val.toFixed(1);
-		otgw.debug(__('speech.' + speech[id].text, { arg: val }));
-		Homey.manager('speech-output').say(__('speech.' + speech[id].text, { arg: val }));
+		otgw.debug(__('speech.' + speechInfo[id].text, { arg: val }));
+		speech.say(__('speech.' + speechInfo[id].text, { arg: val }));
 	}
 }
 
 // Handler for boiler error question
-function faultSpeechHandler(id) {
+function faultSpeechHandler(id, speech) {
 	var errors = '';
 	var cnt = 0;
-	for (var i in speech[id].var) {
+	for (var i in speechInfo[id].var) {
 		if (otgw.getValue(null, i)) {
-			errors += speech[id].var[i].txt[locale] + ' & ';
+			errors += speechInfo[id].var[i].txt[locale] + ' & ';
 			cnt++;
 		}
 	}
 	if (cnt == 0) {
 		otgw.debug(__('speech.no_error'));
-		Homey.manager('speech-output').say(__('speech.no_error'));
+		speech.say(__('speech.no_error'));
 	} else {
 		errors = errors.slice(0, -3); // remove last ' & ';
 		var txt;
@@ -107,12 +107,12 @@ function faultSpeechHandler(id) {
 			txt = __('speech.has_errors', { cnt: cnt, errors: errors });
 		}
 		otgw.debug(txt);
-		Homey.manager('speech-output').say(txt);
+		speech.say(txt);
 	}
 }
 
 // Speech ids and actions
-var speech = [
+var speechInfo = [
 	{ says: ['room', 'temp'], var: 'CurrentTemperature', capability: 'measure_temperature', text: 'room_temp' },
 	{ says: ['target', 'temp'], var: 'CurrentSetpoint', capability: 'measure_temperature', text: 'room_target' },
 	{ says: ['boiler', 'temp'], var: 'BoilerWaterTemperature', capability: 'measure_temperature', text: 'boiler_temp' },
@@ -201,20 +201,20 @@ function init() {
 			Homey.manager('speech-input').on('speech', function(list, callback) {
 				var matched = false;
 				otgw.debug('Received speech trigger');
-				for (var i = 0; i < speech.length; i++) {
+				for (var i = 0; i < speechInfo.length; i++) {
 					var match = 0;
 					list.triggers.forEach(function(trigger) {
-						for (var m = 0; m < speech[i].says.length; m++) {
-							if (trigger.id == speech[i].says[m]) {
+						for (var m = 0; m < speechInfo[i].says.length; m++) {
+							if (trigger.id == speechInfo[i].says[m]) {
 								match++;
 							}
 						}
 					});
-					matched = match == speech[i].says.length;
+					matched = match == speechInfo[i].says.length;
 					if (matched) {
-						otgw.debug('Match on ' + speech[i].says);
-						var handler = speech[i].handler || defaultSpeechHandler;
-						handler(i);
+						otgw.debug('Match on ' + speechInfo[i].says);
+						var handler = speechInfo[i].handler || defaultSpeechHandler;
+						handler(i, list);
 					}
 				}
 				callback(matched ? null : true, matched ? true : null);

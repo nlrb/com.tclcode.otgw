@@ -26,22 +26,43 @@
 			.network .ng-invalid{
 				border: 1px solid red;
 			}
+			.debug {
+				font-family: monospace;
+				font-size: 11px;
+				line-height: 12px;
+			}
+			.debug td {
+				padding-right: 8px;
+				vertical-align: top;
+			}
 			input[type="radio"]:not(:checked)+label{ font-weight: lighter; }
 		</style>
-		<script type="text/javascript" src="/manager/webserver/assets/js/jquery.js"></script>
+		<link rel="stylesheet" type="text/css" href="/manager/devices/devicesettings/css/devicesettings.css">
+		<script type="text/javascript" src="/homey.js" data-origin="settings"></script>
 		<script type="text/javascript" src="/manager/webserver/assets/js/angular.js"></script>
 		<script>
+		  var Homey
 			angular.module('OtgSettingsApp', [])
 			.controller('SettingsCtrl', ['$scope', '$timeout', function($scope, $timeout) {
 				$scope.foundOTG = false;
 				$scope.message = '';
-				$scope.network = {};
-				$scope.features = {};
-				$scope.logging = {};
+				$scope.collapse = { app: false, debug: true };
+				$scope.duplicates = false;
+				$scope.debugLevels = []
+				for (let i = 0; i < 8; i++) {
+					$scope.debugLevels.push({name: __('settings.debug.log.level.' + i), id: i})
+				}
+				$scope.debugLevel = $scope.debugLevels[1]; // App
+				$scope.debugLog = [];
 				$scope.config = {};
-				$scope.timeout;
 				$scope.msgPromise;
-				
+
+				// Toggle the collapse for an element and save it as a setting in Homey
+				$scope.toggleCollapse = function(element) {
+					$scope.collapse[element] = !$scope.collapse[element];
+					Homey.set('collapse', $scope.collapse); // ignore failure
+				}
+
 				// Display message to the user
 				$scope.displayMessage = function(text) {
 					if ($scope.msgPromise != null) {
@@ -56,120 +77,50 @@
 						$(".message").slideUp();
 					}, 5000);
 				}
-				
-				// Save the network configuration
-				$scope.networkSave = function(form) {
-					if (form.$valid) {
-						var address = ' ' + $scope.network.ip + ':' + $scope.network.port;
-						// Search for OTG
-						Homey.api('PUT', '/search/', { 'ip': $scope.network.ip, 'port': $scope.network.port }, function(err, ok) {
-							if (ok) {
-								$scope.displayMessage(__('settings.search.title', { addr: address }));
-							}
-						});
-					}
+
+				$scope.appChange = function() {
+					Homey.set('app', { duplicates: $scope.duplicates }); // ignore failure
 				}
-				
-				// Save network settings when OTG is found
-				$scope.checkFound = function(data) {
-					$scope.foundOTG = data.found;
-					// Use the ip & port on which OTG was found, or previous settings if not found
-					$scope.network.ip = data.ip || $scope.network.ip;
-					$scope.network.port = data.port || $scope.network.port;
-					var address = ' ' + $scope.network.ip + ':' + $scope.network.port;
-					if (data.found) {
-						Homey.set('network', $scope.network);
-						$scope.displayMessage(__('settings.search.success', { addr: address }));
-					} else {
-						$scope.network = {};
-						$scope.networkForm.$setPristine();
-						$scope.displayMessage(__('settings.search.failed', { addr: address }));
-					}
+
+				$scope.levelChange = function() {
+					Homey.set('logLevel', $scope.debugLevel.id); // ignore failure
 				}
-				
-				// Save the features
-				$scope.featureSave = function() {
-					// Store the feature settings
-					Homey.set('features', $scope.features, function(err, value) {
-						if (!err) {
-							$scope.displayMessage(__('settings.app.features.success'));
-						}
-					});
-				};
-				
-				// Save with variables to log
-				$scope.loggingSave = function() {
-					// Add items to watch
-					for (var i in $scope.logitems) {
-						var item = $scope.logitems[i];
-						if (item.watching) {
-							$scope.logging[item.var] = item;
-						} else {
-							// Remove items currently being watched
-							if ($scope.logging[item.var] != null) {
-								delete($scope.logging[item.var]);
-							}
-						}
-					}
-					Homey.set('logging', $scope.logging, function(err, value) {
-						if (!err) {
-							$scope.displayMessage(__('settings.app.logging.success'));
-						}
-					});
-				};
-				
+
 				// Read the application settings
 				$scope.getAppSettings = function() {
-					Homey.get('network', function(err, network) {
-						if (err) { 
-							return console.error('Could not get network settings', err);
-						}
-						$scope.network = network;
-						$scope.$apply();
-					});
-					Homey.get('features', function(err, value) {
+					Homey.get('collapse', function(err, value) {
 						if (value) {
-							$scope.features = value;
+							for (key in value) {
+								$scope.collapse[key] = value[key];
+							}
+							$scope.$apply();
+					}
+					});
+					Homey.get('app', function(err, value) {
+						if (value) {
+							$scope.duplicates = value.duplicates;
+							$scope.$apply();
+					}
+					});
+					Homey.get('logLevel', function(err, value) {
+						if (value) {
+							$scope.debugLevel = $scope.debugLevels[value];
 							$scope.$apply();
 						}
 					});
-					Homey.get('logging', function(err, value) {
-						if (value) {
-							$scope.logging = value;
-						}
-						Homey.api('GET', '/getLogVars/', {}, function(err, items) {
-							if (items) {
-								for (var i in items) {
-									// Mark the variables we are watching in our settings
-									items[i].watching = $scope.logging[items[i].var] != null;
-								}
-								$scope.logitems = items;
-								$scope.$apply();
-							}
-						});
-					});
 				}
-					
+
 				$scope.getAppSettings();
 
 				// Actions for back-end triggers
-				Homey.on('found_otg', $scope.checkFound);
-				Homey.on('config_change', function(value) {
-					if (value) {
-						$scope.config = value;
-						$scope.$apply();
-					}
-				});
-				// Get Gateway configuration
-				Homey.api('GET', '/getOtgwConfig/', {}, function(err, config) {
-					if (config) {
-						$scope.config = config;
-						$scope.$apply();
-					}
+				Homey.on('debug', function(data) {
+					$scope.debugLog = data;
+					$scope.$apply();
 				});
 			}]);
-			
-			function onHomeyReady(){
+
+			function onHomeyReady(homey){
+				Homey = homey
 				angular.bootstrap(document, ['OtgSettingsApp']);
 				Homey.ready();
 			}
@@ -185,52 +136,31 @@
 		</fieldset>
 		<div id="application">
 			<h1 data-i18n="settings.app.title"></h1>
-			<p data-i18n="settings.app.network.description"></p>
-			<fieldset>
-				<legend data-i18n="settings.app.network.title"></legend>
-				<form name="networkForm" class="network" ng-class="{'submitted': submitted}" ng-submit="networkSave(networkForm)" >
-					<div class="oneline"><label for="network-ip" data-i18n="settings.app.network.ip"></label><input class="network-input network-ip" ng-model="network.ip" placeholder="0.0.0.0" ng-pattern="/^([0-9]{1,3})[.]([0-9]{1,3})[.]([0-9]{1,3})[.]([0-9]{1,3})$/" required/></div>
-					&nbsp;&nbsp;&nbsp;:
-					<div class="oneline"><input class="network-input network-port" ng-model="network.port" placeholder="23" ng-pattern="/^\d+$/" required/></div>
-					<p></p>
-					<button type="submit" class="btn btn-default" ng-click="submitted=true;" data-i18n="settings.app.network.submit"></button>
-				</form>
-			</fieldset>
-			<p data-i18n="settings.app.features.description"></p>
-			<fieldset>
-				<legend data-i18n="settings.app.features.title"></legend>
-				<form ng-submit="featureSave()">
-					<div class="oneline" data-i18n="settings.app.features.set"></div>
-					<input type="radio" id="pset-on" value="1" ng-model="features.permanent"><label for="pset-on" data-i18n="settings.app.features.seton"></label>
-					<input type="radio" id="pset-off" value="0" ng-model="features.permanent"><label for="pset-off" data-i18n="settings.app.features.setoff"></label>
-					<p></p>
-					<div class="oneline" data-i18n="settings.app.features.ventilation"></div>
-					<input type="radio" id="vset-on" value="1" ng-model="features.ventilation"><label for="vset-on" data-i18n="settings.app.features.venton"></label>
-					<input type="radio" id="vset-off" value="0" ng-model="features.ventilation"><label for="vset-off" data-i18n="settings.app.features.ventoff"></label>
-					<p></p>
-					<button type="submit" class="btn btn-default" ng-click="submitted=true;" data-i18n="settings.app.features.submit"></button>
-				</form>
-			</fieldset>
-			<p data-i18n="settings.app.logging.description"></p>
-			<fieldset>
-				<legend data-i18n="settings.app.logging.title"></legend>
-				<form name="loggingForm" ng-submit="loggingSave()">
-					<div ng-repeat="item in logitems | orderBy: 'id'">
-						<input type="checkbox" value="{{item.var}}" ng-model="item.watching"><label>{{item.txt}}</label>
+			<fieldset ng-class="{ 'collapsed': collapse.app }">
+				<legend data-i18n="settings.app.device.name" ng-click="toggleCollapse('app')"></legend>
+				<form name="appForm" ng-show="!collapse.app">
+					<div class="oneline">
+						<label style="padding-right:10px" data-i18n="settings.app.device.duplicates"></label>
+						<input type="checkbox" ng-model="duplicates" ng-change="appChange()">
 					</div>
-					<p></p>
-					<button type="submit" class="btn btn-default" ng-click="submitted=true;" data-i18n="settings.app.logging.submit"></button>
 				</form>
 			</fieldset>
 		</div>
-		<p></p>
-		<div id="gateway">
-			<h1 data-i18n="settings.gateway.title"></h1>
-			<fieldset>
-				<legend data-i18n="settings.gateway.device.title"></legend>
-				<div ng-repeat="item in config">
-					{{item.txt}}: {{item.txtVal}}
-				</div>
+		<div id="debug">
+			<h1 data-i18n="settings.debug.title"></h1>
+			<fieldset ng-class="{ 'collapsed': collapse.debug }">
+				<legend data-i18n="settings.debug.log.name" ng-click="toggleCollapse('debug')"></legend>
+				<form name="debugForm" ng-show="!collapse.debug">
+					<div class="oneline">
+						<label style="padding-right:10px" for="debugLevel" data-i18n="settings.debug.log.level.title"></label>
+						<select ng-model="debugLevel" ng-options="x.name for x in debugLevels track by x.id" ng-change="levelChange()"></select>
+					</div>
+				</form>
+				<table class="debug" ng-show="!collapse.debug">
+					<tr ng-repeat="item in debugLog">
+						<td>{{item.time}}</td><td>{{item.msg}}</td>
+					</tr>
+				</table>
 			</fieldset>
 		</div>
 	</body>

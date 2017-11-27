@@ -2,50 +2,47 @@
 This is the OpenTherm Gateway application for Homey.
 More information on the OpenTherm Gateway (OTG) can be found on http://otgw.tclcode.com.
 
-### Settings
-After installing the application, first visit the Homey Settings and navigate to the 'OpenTherm Gateway' application.
-![](http://homey.ramonbaas.nl/otgw/to_settings.png)
-#### Application configuration
-##### Network
-There is no automatic way of finding an OpenTherm Gateway in your network, hence you will need to show the app where it can be found.
+##### Hardware
+You can order the gateway hardware e.g. via:
+[KIWI electronics](https://www.kiwi-electronics.nl/opentherm-gateway-kit)
+or
+[NODO-SHOP](https://www.nodo-shop.nl/nl/opentherm-gateway/188-opentherm-gateway.html)
+.
 
-![](http://homey.ramonbaas.nl/otgw/settings_network.png)
+#### Migration: Important note
+If you have version 1.0.x of the application installed, please read these notes before switching to version 2.
+* A Gateway device is needed for the application to work. You will need to add this device after the upgrade.
+* The Temperature and Pressure devices are no longer supported. They will need to be replaced by Sensor devices.
+* Only the Thermostat device can be re-used, but it is adviced to remove this and pair a new one as well.
+* Logging values to Insights can no longer be selected separately; to log data to Insights it will need to be a part of a Sensor device
+* Application settings have been moved to the Gateway and Thermostat devices
+* Be aware when installing version 2 that Insights data will be lost and flows will be broken
 
-After entering the ip address and port number, press 'Save network settings'. The application will start searching for the OTG and once found the following message appears on the top of the settings screen.
-
-![](http://homey.ramonbaas.nl/otgw/network_found.png)
-##### Features
-The following application features are available.
-
-![](http://homey.ramonbaas.nl/otgw/settings_features.png)
-
-When a temperature change on the thermostat device is made, either a 'TC' or 'TT' can be send to the OTG. A 'TC' will make it a permanent ('constant') change, until you change a setting on the thermostat. A 'TT' will make the temperature setting 'temporary'. In this case a program change (e.g. at 17.00 or so) will undo the settings, and the program will resume.
-**Please note that not all thermostats support these commands. Check the [Equipment matrix](http://otgw.tclcode.com/matrix.cgi#thermostats "Equipment matrix") on the OTG website for message 9 and 100.**
-
-The second option allows you to have the app send a 'SR=70:0,0' command. This results the thermostat believing that a ventilation device is supported. Some thermostats (like e.g. the Honeywell Chronotherm Modulation) can show the air humidity. But it will show it only when this option is set to 'Yes'. You can send a humidity value to the OTG via a Homey Flow card.
-##### <a name="Logging"></a>Logging
-All values changes that occur between master and slave can be logged in Homey Insights. However, only messages that are supported by the boiler and/or thermostat will show up in the list. When fist starting up, it will take some time before the app knows which messages give valid values. So make sure the app is running for some time before configuring the values to be logged.
-
-![](http://homey.ramonbaas.nl/otgw/settings_logging.png)
-
-Also note that for some values you can choose to create a device. When creating a device the value changes will by default be logged to Insights. So you could log them twice. Hence the advice is to only log values for which no device exists.
-
-#### Gateway configuration
-##### Device settings
-This section will show the settings as stored in the OTG. Please refer to the [OTG website](http://otgw.tclcode.com/firmware.html#dataids "Data ids") for details. An example configuration could look like this:
-
-![](http://homey.ramonbaas.nl/otgw/settings_device.png)
 
 ### Devices
 The following Homey devices are currently supported.
+* Gateway
 * Thermostat
-* Temperature sensor
-* Pressure sensor
+* Boiler
+* Sensor
 
 You can add a device by clicking the '+' and selecting the 'OpenTherm Gateway'
 
-![](http://homey.ramonbaas.nl/otgw/add_device.png)
+#### Gateway device
+After installing the application, the first device that needs to be paired is the Gateway device.
 
+There is no automatic way of finding an OpenTherm Gateway in your network, hence you will need to show the app where it can be found.
+
+After entering the ip address and port number, press 'Start gateway search'. The application will start searching for the OTG and once found the Gateway device will be added to Homey.
+
+The Gateway device will show whether it is in 'Monitoring only' mode. In order to be able to use all functionality this should normally be 'No', which indicates the OTG is in Gateway mode.
+
+The Gateway device will also give you the option to change the current 'Domestic Hot Water' setting directly from the mobile card.
+
+##### Gateway device settings
+All other OTG configuration options can be set from the device settings page. Once they are saved, the configuration is sent to the OTG.
+
+#### Thermostat device
 Normally you can only add one thermostat device, except if you have a second circuit and it is supported by the boiler.
 
 ![](http://homey.ramonbaas.nl/otgw/device_thermostat.png)
@@ -54,21 +51,37 @@ On the Thermostat device you change the temperature, which will either send a 'T
 If the new temperature is higher or equal to the current temperature, the thermostat mode will display 'Heat'. If the new set temperature is lower, the state will show 'Cool'.
 Adjusting the state to 'Cool' or 'Heat' manually has no effect. However, setting the state to 'Automatic' will send a 'TT=0' command, which results in the thermostat returning to the regular program.
 
-Only one pressure sensor is available (Central heating water pressure). It can also be that your boiler does not support this measurement via OpenTherm, in which case no pressure sensor can be added.
+##### Thermostat device settings
+The following features are available.
 
-Likely various temperature sensors can be added. Again, which ones are available depends on what you Boiler supports.
+When a temperature change on the thermostat device is made, either a 'TC' or 'TT' can be send to the OTG. A 'TC' will make it a permanent ('constant') change, until you change a setting on the thermostat. A 'TT' will make the temperature setting 'temporary'. In this case a program change (e.g. at 17.00 or so) will undo the settings, and the program will resume.
+**Please note that not all thermostats support these commands. Check the [Equipment matrix](http://otgw.tclcode.com/matrix.cgi#thermostats "Equipment matrix") on the OTG website for message 9 and 100.**
 
-![](http://homey.ramonbaas.nl/otgw/device_temperature.png)
+The second option allows you to have the app send a 'SR=70:0,0' command. This results the thermostat believing that a ventilation device is supported. Some thermostats (like e.g. the Honeywell Chronotherm Modulation) can show the air humidity. But it will show it only when this option is set to 'Yes'. You can send a humidity value to the OTG via a Homey Flow card.
+
+#### Boiler device
+A pre-defined sensor-type device is available for pairing, called the Boiler device. When this device is added, you can view the following status items of the boiler:
+* Flame on/off
+* Heating on/off
+* Modulation level
+* Heating water on/off
+* Boiler error true/false
+
+#### Sensor device
+You can create and add your own sensor devices, containing values that are supported by your thermostat or boiler. During pairing a list is shown of available variables that can be added to your sensor.
+
+You can add as many entries to one sensor device as you like. They are added in the order the tick-marks are placed.
+
+However, only messages that are supported by the boiler and/or thermostat will show up in the list. When fist starting up, it will take some time before the app knows which messages give valid values. So make sure the app is running for some time before configuring the sensor device.
 
 *Note*: OpenTherm messages can come by in a slow pace, which means that updates can also be slow. E.g. when setting a new temperature on the thermostat, it will not take effect immediately. So when re-opening the device it can still show an old value. There's no other remedy than patience.
 
-
 ### Flows
-The OpenTherm app offers cards for triggers, conditions and actions. Note that also your thermostat and temperature/pressure devices can be used in flows.
+The Gateway device offers cards for triggers, conditions and actions. Note that also your thermostat device can be used in flows.
 
 ![](http://homey.ramonbaas.nl/otgw/flow_status.png)
-##### Actions
-The following actions are available:
+##### Triggers
+The following triggers are available:
 
 * Status flag changes (becomes active or inactive)
   * token 'Status': the status flag that gets active/inactive, which can be:
@@ -115,8 +128,9 @@ The following actions are available:
 
 ##### Conditions
 Only one condition currently exists, which is to check whether the Remote Override is (in-)active (i.e. whether a temperature has been set via the application or not).
+
 ##### Actions
-The following actions are supported.
+The following actions are supported. The actions are available on the Gateway device.
 
 * *Send Gateway command*. This should be a command as supported by the OTG. For a list of commands see the [OTG website](http://otgw.tclcode.com/firmware.html#dataids "Data ids"). Once the command is received the trigger 'Response received' will be fired.
 
@@ -124,13 +138,13 @@ The following actions are supported.
 * *Set hot water mode*. The DHW (Domestic Hot Water) mode can be set to be either 'Thermostat controlled', 'Keep water hot' or 'Don't pre-heat'. You can use this to save energy when e.g. you are not home or at night, as you likely don't need hot water right away.
 
     ![](http://homey.ramonbaas.nl/otgw/action_dhw.png)
-* *Set current thermostat time*. For thermostats that support message ids 21 and 22, you have the option to synchronize the time from Homey to the thermostat. 
+* *Set current thermostat time*. For thermostats that support message ids 21 and 22, you have the option to synchronize the time from Homey to the thermostat.
 
     ![](http://homey.ramonbaas.nl/otgw/action_time.png)
-* *Set outside temperature*. If there is a temperature sensor device in Homey that measures the outside temperature, you can use this to send that information to the thermostat. This can enable an option like 'Optimal Comfort', which can heat the room independent of the temperature measured by the thermostat itself. 
+* *Set outside temperature*. If there is a temperature sensor device in Homey that measures the outside temperature, you can use this to send that information to the thermostat. This can enable an option like 'Optimal Comfort', which can heat the room independent of the temperature measured by the thermostat itself.
 
     ![](http://homey.ramonbaas.nl/otgw/action_outside.png)
-* *Set humidity level*. Send a humidity percentage measurement to the thermostat, as it would be measured by a ventilation system. 
+* *Set humidity level*. Send a humidity percentage measurement to the thermostat, as it would be measured by a ventilation system.
 
     ![](http://homey.ramonbaas.nl/otgw/action_humidity.png)
 
@@ -142,9 +156,6 @@ You can ask Homey a number of questions related to the thermostat or boiler, e.g
 * "Is there a boiler problem?"
 * "What is the boiler pressure?"
 * "What is the boiler water temperature?"
-
-### Insights
-See the settings section on how to configure [logging](#Logging) to Homey Insights.
 
 ### API
 To enable usage of the values read from the OpenTherm Gateway outside of the app, there is are 2 API function available. They can be used unauthenticated.
@@ -162,6 +173,13 @@ An example how to invoke `getOtgwVars`
 
 
 ### Versions
+* 2.0.0 Complete re-write to Athom SDK v2
+  * Adds support for multiple gateways
+  * Adds support for changing gateway hardware configuration
+  * Adds support for user defined sensor devices
+  * Removed temperature and pressure devices
+* 1.0.2 Process intermediate settings updates
+* 1.0.1 Fix for failed startup on Homey booting
 * 1.0.0 Updates for thermostat_mode and Homey FW 1.0.1
 * 0.6.2 Fixes for API changes of Homey FW 0.9.1 (custom capabilities)
 * 0.6.1 Custom state capability added since Athom removed the 'thermostat_state' device capability

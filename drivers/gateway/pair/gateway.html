@@ -1,0 +1,108 @@
+<style>
+	.message {
+		background: #f8f8f8;
+		display: none;
+	}
+	.message-bar {
+		font-style: italic;
+		font-weight: bolder;
+	}
+	.oneline {
+		display: inline-flex;
+		align-items: center;
+	}
+	.regular {
+		border: 1px solid #aaa;
+		padding: .5em .75em;
+		border-radius: 2px;
+	}
+	.network-input {
+		margin-left: 10px;
+	}
+	.network-ip {
+		width: 100px;
+	}
+	.network-port {
+		width: 40px;
+	}
+	.network .ng-invalid{
+		border: 1px solid red;
+	}
+</style>
+<script type="application/javascript">
+	var timeout;
+	var msgPromise;
+
+	// Display message to the user
+	function displayMessage(text, remove) {
+		if (msgPromise != null) {
+			clearTimeout(msgPromise);
+		}
+		$('#messageContent').text(text);
+		$('#message').slideDown();
+		if (remove) {
+			msgPromise = setTimeout(function() {
+				$('#messageContent').text('');
+				$('#message').slideUp();
+			}, 5000);
+		}
+	}
+
+	Homey.setTitle(__('pair.gateway.name'));
+
+	// Save the network configuration
+	function networkSave(form) {
+		var ip = $('#ip').val();
+		var port = $('#port').val();
+		var address = ip + ':' + port;
+		// Search for an OpenTherm Gateway
+		displayMessage(__('pair.gateway.search.title', { addr: address }), false);
+		Homey.emit('search', { 'ip': ip, 'port': port }, function(err, ok) {
+		});
+		$('#search_button').prop('disabled', true);
+	}
+
+	Homey.on("try", function(network) {
+		$('#ip').val(network.ip);
+		$('#port').val(network.port);
+	})
+
+	Homey.on("available", function(data) {
+		if (data.found) {
+			Homey.addDevice(data.device, function(err, result) {
+    		if (err) {
+					displayMessage(__('pair.gateway.failed', { detail: err }), false);
+				} else {
+    			Homey.done();
+				}
+			});
+		} else {
+			var ip = $('#ip').val();
+			var port = $('#port').val();
+			var address = ip + ':' + port;
+			displayMessage(__('pair.gateway.search.failed', { addr: address }), true);
+			$('#search_button').prop('disabled', false);
+			$('#ip').val('');
+			$('#port').val('');
+		}
+	});
+</script>
+
+<p data-i18n="pair.gateway.explain"></p>
+<fieldset id="message" class="message">
+	<legend>Message</legend>
+	<div id="messageContent" class="message-bar">
+	</div>
+</fieldset>
+<img src="../assets/icon.svg" width="100px">
+<p></p>
+<form name="networkForm" class="network" action="javascript: networkSave(networkForm)">
+	<fieldset>
+		<legend data-i18n="pair.gateway.network.title"></legend>
+		<div class="oneline"><label for="network-ip" data-i18n="pair.gateway.network.ip"></label><input class="network-input network-ip regular" id="ip" placeholder="0.0.0.0" ng-pattern="/^([0-9]{1,3})[.]([0-9]{1,3})[.]([0-9]{1,3})[.]([0-9]{1,3})$/" required/></div>
+		&nbsp;&nbsp;&nbsp;:
+		<div class="oneline"><input class="network-input network-port regular" id="port" placeholder="23" ng-pattern="/^\d+$/" required/></div>
+	</fieldset>
+	<p></p>
+	<button type="submit" id="search_button" class="button" data-i18n="pair.gateway.submit"></button>
+</form>

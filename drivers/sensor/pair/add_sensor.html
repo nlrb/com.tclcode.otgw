@@ -1,0 +1,60 @@
+<script>
+  /*
+     Note: depends on implementation of 'list_devices' template
+     Uses varaibles 'selected_devices' and 'found_devices_list'
+  */
+  Homey.setTitle(__('pair.sensor.add.title'))
+  var devs = window.selected_devices
+  var device = {
+    name: 'OTG Sensor',
+    data: { id: 'OTG:Sensor', watch: [] },
+    capabilities: [],
+    capabilitiesOptions: {},
+    mobile: {
+      components: [ { id: 'icon' }, { id: 'sensor', capabilities: [], options: { icons: {} } } ]
+    }
+  }
+  if (devs && devs.length > 0) {
+    for (let i = 0; i < devs.length; i++) {
+      let data = JSON.parse(devs[i])
+      let id = data.id
+      // Search for id in 'found_devices_list'
+      let all = window.found_devices_list
+      let j = 0;
+      let found = false;
+      while (!found && j < all.length) {
+        found = (all[j].data.id === id)
+        if (!found) j++
+      }
+      //console.log(all[j])
+      device.data.id += '/' + all[j].data.watch[0].variable
+      device.data.gid = all[j].data.gid // all devices have the same gateway
+      device.data.watch = device.data.watch.concat(all[j].data.watch.map(x =>
+        { return { variable: x.variable, event: x.event + '.' + i }})
+      )
+      device.capabilities = device.capabilities.concat(all[j].capabilities.map(x => x + '.' + i))
+      for (let k in all[j].capabilitiesOptions) {
+        device.capabilitiesOptions[k + '.' + i] = all[j].capabilitiesOptions[k]
+      }
+      if (all[j].mobile) {
+        device.mobile.components[1].capabilities =
+          device.mobile.components[1].capabilities.concat(all[j].mobile.components[1].capabilities.map(x => x + '.' + i))
+        for (let o in all[j].mobile.components[1].options) {
+          if (o === 'icons') {
+            for (let k in all[j].mobile.components[1].options.icons) {
+              device.mobile.components[1].options.icons[k + '.' + i] = all[j].mobile.components[1].options.icons[k]
+            }
+          } else {
+            device.mobile.components[1].options[o + '.' + i] = all[j].mobile.components[1].options[o]
+          }
+        }
+      } else {
+        device.mobile.components[1].capabilities.push(device.capabilities[i])
+      }
+    }
+    //console.log(device)
+    Homey.addDevice(device, () => {
+      Homey.done()
+    })
+  }
+</script>

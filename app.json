@@ -1,449 +1,1395 @@
 {
-	"id": "com.tclcode.otgw",
+    "id": "com.tclcode.otgw",
+    "sdk": 2,
     "name": {
         "en": "OpenTherm Gateway"
     },
-    "version": "1.0.1",
-	"compatibility": ">=1.0.0",
-	"description": {
-		"en": "Control your OpenTherm Gateway via Homey",
-		"nl": "Bestuur je OpenTherm Gateway met Homey"
-	},
-	"author": {
-		"name": "Ramón Baas",
-		"website": "http://otgw.tclcode.com/"
-	},
-	"category": "climate",
-	"images": {
-		"large": "assets/images/large.png",
-		"small": "assets/images/small.png"
-	},
-	"capabilities": {
-		"flame_on": {
-			"type": "boolean", 
-			"title": { "en": "Flame on", "nl": "Vlam aan" },
-			"getable": true, 
-			"setable": false 
-		},
-		"heating_on": {
-			"type": "boolean", 
-			"title": { "en": "Heating on", "nl": "Verwarming aan" },
-			"getable": true, 
-			"setable": false 
-		},
-		"cooling_on": {
-			"type": "boolean", 
-			"title": { "en": "Cooling on", "nl": "Koelen aan" },
-			"getable": true, 
-			"setable": false 
-		},
-		"heating_water": { 
-			"type": "boolean", 
-			"title": { "en": "Heating water", "nl": "Water verwarmen" },
-			"getable": true, 
-			"setable": false 
-		},
-		"fault": {
-			"type": "boolean", 
-			"title": { "en": "Fault", "nl": "Fout" },
-			"getable": true, 
-			"setable": false 
-		}
-	},
-	"drivers": [
-		{
-			"id": "thermostat",
-			"name": {
-				"en": "Thermostat",
-				"nl": "Thermostaat"
-			},
-			"class": "thermostat",
-			"capabilities": [ 
-				"target_temperature", 
-				"measure_temperature", 
-				"thermostat_mode",
-				"flame_on",
-				"heating_on",
-				"cooling_on",
-				"heating_water",
-				"fault"
-			],
-			"images": {
-				"large": "drivers/thermostat/assets/images/large.png",
-				"small": "drivers/thermostat/assets/images/small.png"
-			},
-			"pair": [
-				{
-					"id": "list_thermostats",
-					"template": "list_devices",
-					"navigation": {
-						"next": "add_thermostats"
-					}
-				},
-				{
-					"id": "add_thermostats",
-					"template": "add_devices"
-				}
-			]
-		},
-			{
-			"id": "temperature",
-			"name": {
-				"en": "Temperature Sensor",
-				"nl": "Temperatuur Sensor"
-			},
-			"class": "sensor",
-			"capabilities": [ "measure_temperature" ],
-			"images": {
-				"large": "drivers/temperature/assets/images/large.png",
-				"small": "drivers/temperature/assets/images/small.png"
-			},
-			"pair": [
-				{
-					"id": "list_sensors",
-					"template": "list_devices",
-					"navigation": {
-						"next": "add_sensors"
-					}
-				},
-				{
-					"id": "add_sensors",
-					"template": "add_devices"
-				}
-			]
-		},
-			{
-			"id": "pressure",
-			"name": {
-				"en": "Pressure Sensor",
-				"nl": "Druk Sensor"
-			},
-			"class": "sensor",
-			"capabilities": [ "measure_pressure" ],
-			"images": {
-				"large": "drivers/pressure/assets/images/large.png",
-				"small": "drivers/pressure/assets/images/small.png"
-			},
-			"pair": [
-				{
-					"id": "list_sensors",
-					"template": "list_devices",
-					"navigation": {
-						"next": "add_sensors"
-					}
-				},
-				{
-					"id": "add_sensors",
-					"template": "add_devices"
-				}
-			]
-		}
-	],
-	"flow": {
-		"triggers": [
-			{
-				"id": "status",
-				"title": {
-					"en": "Status flag gets",
-					"nl": "Statusvlag wordt"
-				},
-				"args": [
-					{
-						"name": "values",
-						"type": "dropdown",
-						"values": [
-							{
-								"id": "on",
-								"label": {
-										"en": "active",
-										"nl": "actief"
-								}
-							},
-							{
-								"id": "off",
-								"label": {
-										"en": "inactive",
-										"nl": "inactief"
-								}
-							}
-						]
-					}
-				],
-				"tokens": [
-					{
-						"name": "flag",
-						"title": { 
-							"en": "Status flag",
-							"nl": "Statusvlag"
-						}
-					}
-				]
-			},
-			{
-				"id": "faultcode",
-				"title": {
-					"en": "Boiler fault code gets",
-					"nl": "Ketelstoringscode wordt"
-				},
-				"args": [
-					{
-						"name": "values",
-						"type": "dropdown",
-						"values": [
-							{
-								"id": "on",
-								"label": {
-										"en": "active",
-										"nl": "actief"
-								}
-							},
-							{
-								"id": "off",
-								"label": {
-										"en": "inactive",
-										"nl": "inactief"
-								}
-							}
-						]
-					}
-				],
-				"tokens": [
-					{
-						"name": "OEM",
-						"title": { 
-							"en": "OEM code"
-						}
-					},
-					{
-						"name": "type",
-						"title": { 
-							"en": "Fault type",
-							"nl": "Type fout"
-						}
-					}
-				]
-			},
-			{
-				"id": "override",
-				"title": {
-					"en": "Room setpoint override gets",
-					"nl": "Overschrijven kamertemp. wordt"
-				},
-				"args": [
-					{
-						"name": "values",
-						"type": "dropdown",
-						"values": [
-							{
-								"id": "on",
-								"label": {
-										"en": "active",
-										"nl": "actief"
-								}
-							},
-							{
-								"id": "off",
-								"label": {
-										"en": "inactive",
-										"nl": "inactief"
-								}
-							}
-						]
-					}
-				],
-				"tokens": [
-					{
-						"name": "temp",
-						"title": { 
-							"en": "Temperature",
-							"nl": "Temperatuur"
-						}
-					}
-				]
-			},
-			{
-				"id": "command",
-				"title": {
-					"en": "Response received",
-					"nl": "Antwoord ontvangen"
-				},
-				"tokens": [
-					{
-						"name": "response",
-						"title": {
-							"en": "Response",
-							"nl": "Antwoord"
-						}
-					},
-					{
-						"name": "result",
-						"title": {
-							"en": "Result",
-							"nl": "Resultaat"
-						}
-					}
-				]
-			}
-		],
-		"conditions": [
-			{
-				"id": "override",
-				"title": {
-					"en": "Remote override is !{{active|inactive}}",
-					"nl": "Overschrijven kamertemperatuur is !{{aan|uit}}"
-				}
-			}
-		],
-		"actions": [
-			{
-				"id": "setHotWater",
-				"title": {
-					"en": "Set hot water mode",
-					"nl": "Zet tapwater mode"
-				},
-				"args": [
-					{
-						"name": "mode",
-						"type": "dropdown",
-						"values": [
-							{
-								"id": "thermostat",
-								"label": {
-										"en": "Thermostat controlled",
-										"nl": "Volg thermostaat"
-								}
-							},
-							{
-								"id": "on",
-								"label": {
-										"en": "Keep water hot",
-										"nl": "Hou water heet"
-								}
-							},
-							{
-								"id": "off",
-								"label": {
-										"en": "Don't pre-heat",
-										"nl": "Niet voorverwarmen"
-								}
-							}
-						]
-					}
-				]
-			},
-			{
-				"id": "setClock",
-				"title": {
-					"en": "Set current thermostat time",
-					"nl": "Zet huidige tijd thermostaat"
-				}
-			},
-			{
-				"id": "setOutsideTemperature",
-				"title": {
-					"en": "Set outside temperature",
-					"nl": "Zet buitentemperatuur"
-				},
-				"args": [
-					{
-						"name": "temperature",
-						"type": "number",
-						"min": -20,
-						"max": 40,
-						"placeholder": { "en": "In degree celcius", "nl": "In graden celcius" }
-					}
-				]
-			},
-			{
-				"id": "setRoomHumidity",
-				"title": {
-					"en": "Set humidity level",
-					"nl": "Zet luchtvochtigheid"
-				},
-				"args": [
-					{
-						"name": "humidity",
-						"type": "number",
-						"min": 0,
-						"max": 100,
-						"placeholder": { "en": "In percent", "nl": "Als percentage" }
-					}
-				]
-			},
-			{
-				"id": "sendCommand",
-				"title": {
-					"en": "Send Gateway command",
-					"nl": "Verstuur commando"
-				},
-				"args": [
-					{
-						"name": "command",
-						"type": "text",
-						"placeholder": { "en": "e.g. PR=A" }
-					}
-				]
-			}
-		]
+    "description": {
+        "en": "Control your boiler and thermostat with Homey via the OpenTherm Gateway",
+        "nl": "Bestuur je OpenTherm Gateway met Homey"
     },
-	"permissions": [
-        "homey:manager:speech-input",
-        "homey:manager:speech-output"
+    "category": "climate",
+    "version": "2.0.0",
+    "compatibility": ">=1.5.0",
+    "author": {
+      "name": "Ramón Baas",
+  		"website": "http://otgw.tclcode.com/"
+  	},
+  	"images": {
+  		"large": "assets/images/large.png",
+  		"small": "assets/images/small.png"
+  	},
+  	"capabilities": {
+      "monitor_mode": {
+        "type": "boolean",
+        "title": { "en": "Monitor only", "nl": "Alleen monitoren" },
+  			"getable": true,
+  			"setable": true
+      },
+      "dhw_setting": {
+        "type": "enum",
+        "title": { "en": "Domestic Hot Water", "nl": "Tapwater verwarmen" },
+        "values": [
+  				{ "id": "on", "title": { "en": "On (comfort mode)", "nl": "Aan (comfort mode)" } },
+  				{ "id": "thermostat", "title": { "en": "Thermostat controlled", "nl": "Volgt thermostaat" } },
+  				{ "id": "off", "title": { "en": "Off", "nl": "Uit" } }
+  			],
+  			"getable": true,
+  			"setable": true
+      },
+  		"flame_on": {
+  			"type": "boolean",
+  			"title": { "en": "Flame on", "nl": "Vlam aan" },
+  			"getable": true,
+  			"setable": false
+  		},
+  		"heating_on": {
+  			"type": "boolean",
+  			"title": { "en": "Heating on", "nl": "Verwarming aan" },
+  			"getable": true,
+  			"setable": false
+  		},
+  		"modulation": {
+  			"type": "number",
+  			"title": { "en": "Modulation", "nl": "Modulatie" },
+  			"getable": true,
+  			"setable": false,
+        "units": { "en": "%" }
+  		},
+  		"heating_water": {
+  			"type": "boolean",
+  			"title": { "en": "Heating water", "nl": "Water verwarmen" },
+  			"getable": true,
+  			"setable": false
+  		},
+  		"fault": {
+  			"type": "boolean",
+  			"title": { "en": "Fault", "nl": "Fout" },
+  			"getable": true,
+  			"setable": false
+      },
+  		"percentage": {
+  			"type": "number",
+  			"title": { "en": "Percentage" },
+  			"getable": true,
+  			"setable": false,
+        "units": { "en": "%" }
+      },
+  		"counter": {
+  			"type": "number",
+  			"title": { "en": "Counter", "nl": "Teller" },
+  			"getable": true,
+  			"setable": false
+  		}
+  	},
+  	"drivers": [
+      {
+  			"id": "gateway",
+  			"name": {
+  				"en": "Gateway"
+  			},
+  			"class": "sensor",
+        "capabilities": [ "monitor_mode", "dhw_setting" ],
+        "mobile": {
+          "components": [
+            {
+              "id": "icon"
+            },
+            {
+              "id": "sensor",
+              "capabilities": [ "monitor_mode" ],
+              "options": {
+                "icons": {
+                  "monitor_mode": "./drivers/gateway/assets/monitor.svg"
+                }
+              }
+            },
+            {
+              "id": "picker",
+              "capabilities": [ "dhw_setting" ]
+            }
+          ]
+        },
+        "pair": [
+          {
+            "id": "gateway"
+          }
+        ],
+        "settings": [{
+          "type": "group",
+          "label": {
+              "en": "Network settings"
+          },
+          "children": [
+            {
+              "id": "ip",
+              "type": "text",
+              "label": {
+                "en": "IP address"
+              },
+              "value": "127.0.0.1",
+              "pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+            },
+            {
+              "id": "port",
+              "type": "number",
+              "label": {
+                  "en": "IP port"
+              },
+              "value": 23,
+              "attr": {
+                  "min": 0,
+                  "max": 65535
+              }
+            }]
+          },
+          {
+            "type": "group",
+            "label": { "en": "Hardware configuration", "nl": "Hardware configuratie" },
+            "children": [
+              {
+                "id": "FirmwareVersion",
+                "type": "label",
+                "label": { "en": "Gateway firmware verion", "nl": "Gateway firmware versie" },
+                "value": ""
+              },
+              {
+                "id": "GatewayMode",
+                "type": "dropdown",
+                "label": { "en": "Operating mode", "nl": "Bedrijfsmodus" },
+                "values": [
+                  { "id": "0", "label": { "en": "Monitor" } },
+                  { "id": "1", "label": { "en": "Gateway" } }
+                ],
+                "hint": {
+                  "en": "WARNING: if the OpenTherm Gateway is in 'Monitor' mode a lot of functions will not be availble (e.g. change temperature).",
+                  "nl": "PAS OP: als de OpenTherm Gateway bedrijfsmodus op 'Monitor' staat zijn een heleboel functies niet beschikbaar (b.v. temperatuur aanpassen)."
+                },
+                "value": "1"
+              },
+              {
+                "id": "PowerLevel",
+                "type": "label",
+                "label": { "en": "Current power level", "nl": "Huidig stroomniveau" },
+                "value": ""
+              },
+              {
+                "id": "GPIOConfiguration0",
+                "type": "dropdown",
+                "label": { "en": "GPIO configuratie A", "nl": "GPIO configuratie A" },
+                "values": [
+                  { "id": "0", "label": { "en": "None", "nl": "Geen" } },
+                  { "id": "1", "label": { "en": "Ground (0V)" } },
+                  { "id": "2", "label": { "en": "Vcc (5V)" } },
+                  { "id": "3", "label": { "en": "LED E" } },
+                  { "id": "4", "label": { "en": "LED F" } },
+                  { "id": "5", "label": { "en": "Setback (low)", "nl": "Setback (laag)" } },
+                  { "id": "6", "label": { "en": "Setback (high)", "nl": "Setback (hoog)" } },
+                  { "id": "7", "label": { "en": "Temperature sensor", "nl": "Temperatuur sensor" } }
+                ],
+                "value": "0"
+              },
+              {
+                "id": "GPIOConfiguration1",
+                "type": "dropdown",
+                "label": { "en": "GPIO configuratie B", "nl": "GPIO configuratie B" },
+                "values": [
+                  { "id": "0", "label": { "en": "None", "nl": "Geen" } },
+                  { "id": "1", "label": { "en": "Ground (0V)" } },
+                  { "id": "2", "label": { "en": "Vcc (5V)" } },
+                  { "id": "3", "label": { "en": "LED E" } },
+                  { "id": "4", "label": { "en": "LED F" } },
+                  { "id": "5", "label": { "en": "Setback (low)", "nl": "Setback (laag)" } },
+                  { "id": "6", "label": { "en": "Setback (high)", "nl": "Setback (hoog)" } },
+                  { "id": "7", "label": { "en": "Temperature sensor", "nl": "Temperatuur sensor" } }
+                ],
+                "value": "0"
+              },
+              {
+                "id": "IgnoreTransitions",
+                "type": "dropdown",
+                "label": { "en": "Ignore mid-bit transitions", "nl": "Negeer transities mid-bit" },
+                "values": [
+                  { "id": "0", "label": { "en": "Check", "nl": "Controleer" } },
+                  { "id": "1", "label": { "en": "Ignore", "nl": "Negeer" } }
+                ],
+                "value": "0"
+              },
+              {
+                "id": "ROFInBothBytes",
+                "type": "dropdown",
+                "label": { "en": "Remote Override Function flags", "nl": "Remote Override Functie in beide bytes" },
+                "values": [
+                  { "id": "0", "label": { "en": "Low byte only", "nl": "Nee, alleen lage byte" } },
+                  { "id": "1", "label": { "en": "Low and high byte", "nl": "Ja, in hoge en lage byte" } }
+                ],
+                "value": "1"
+              },
+              {
+                "id": "ReferenceVoltage",
+                "type": "dropdown",
+                "label": { "en": "Reference voltage", "nl": "Referentie voltage" },
+                "values": [
+                  { "id": "0", "label": { "en": "0.625V" } },
+                  { "id": "1", "label": { "en": "0.833V" } },
+                  { "id": "2", "label": { "en": "1.042V" } },
+                  { "id": "3", "label": { "en": "1.250V" } },
+                  { "id": "4", "label": { "en": "1.458V" } },
+                  { "id": "5", "label": { "en": "1.667V" } },
+                  { "id": "6", "label": { "en": "1.875V" } },
+                  { "id": "7", "label": { "en": "2.083V" } },
+                  { "id": "8", "label": { "en": "2.292V" } },
+                  { "id": "9", "label": { "en": "2.500V" } }
+                ],
+                "value": "3"
+              },
+              {
+                "id": "SetbackTemperature",
+                "type": "number",
+                "label": { "en": "Setback temperature", "nl": "Setback temperatuur" },
+                "value": 16.00,
+                "attr": {
+                    "min": 0,
+                    "max": 30,
+                    "step": 0.1
+                }
+              },
+              {
+                "id": "LEDFunctions0",
+                "type": "dropdown",
+                "label": { "en": "Function LED A", "nl": "Functie van LED A" },
+                "values": [
+                  {
+                    "id": "R",
+                    "label": {
+                			"en": "Receiving an OpenTherm message from the thermostat or boiler",
+                			"nl": "Ontvangen van een OpenTherm boodschap door de thermostaat of ketel"
+                    }
+              		},
+                  {
+                    "id": "X",
+                    "label": {
+                			"en": "Transmitting an OpenTherm message to the thermostat or boiler",
+                			"nl": "Verzenden van een OpenTherm boodschap aan de thermostaat of ketel"
+                    }
+              		},
+                  {
+                    "id": "T",
+                    "label": {
+                			"en": "Transmitting or receiving a message on the master interface",
+                			"nl": "Verzenden of ontvangen van een OpenTherm boodschap op de master interface"
+                    }
+              		},
+                  {
+                    "id": "B",
+                    "label": {
+                			"en": "Transmitting or receiving a message on the slave interface",
+                			"nl": "Verzenden of ontvangen van een OpenTherm boodschap op de slave interface"
+                    }
+              		},
+                  {
+                    "id": "O",
+                    "label": {
+                			"en": "Remote setpoint override is active",
+                			"nl": "Doeltemperatuur wordt overschreven"
+                    }
+              		},
+                  {
+                    "id": "F",
+                    "label": {
+                			"en": "Flame is on",
+                			"nl": "Vlam is aan"
+                    }
+              		},
+                  {
+                    "id": "H",
+                    "label": {
+                			"en": "Central heating is on",
+                			"nl": "Verwarming is aan"
+                    }
+              		},
+                  {
+                    "id": "W",
+                    "label": {
+                			"en": "Hot water is on",
+                			"nl": "Tapwater is aan"
+                    }
+              		},
+                  {
+                    "id": "C",
+                    "label": {
+                			"en": "Comfort mode (Domestic Hot Water Enable) is on",
+                			"nl": "Comfort mode (tapwater vraag) is aan"
+                    }
+              		},
+                  {
+                    "id": "E",
+                    "label": {
+                			"en": "Transmission error has been detected",
+                			"nl": "Transmissiefout gedetecteerd"
+                    }
+              		},
+                  {
+                    "id": "M",
+                    "label": {
+                			"en": "Boiler requires maintenance",
+                			"nl": "Ketel heeft onderhoud nodig"
+                    }
+              		},
+                  {
+                    "id": "P",
+                    "label": {
+                			"en": "Thermostat requests a raised power level",
+                			"nl": "Thermostaat vraagt meer stroom"
+                    }
+              		}
+                ],
+                "value": "R"
+              },
+              {
+                "id": "LEDFunctions1",
+                "type": "dropdown",
+                "label": { "en": "Function LED B", "nl": "Functie van LED B" },
+                "values": [
+                  {
+                    "id": "R",
+                    "label": {
+                			"en": "Receiving an OpenTherm message from the thermostat or boiler",
+                			"nl": "Ontvangen van een OpenTherm boodschap door de thermostaat of ketel"
+                    }
+              		},
+                  {
+                    "id": "X",
+                    "label": {
+                			"en": "Transmitting an OpenTherm message to the thermostat or boiler",
+                			"nl": "Verzenden van een OpenTherm boodschap aan de thermostaat of ketel"
+                    }
+              		},
+                  {
+                    "id": "T",
+                    "label": {
+                			"en": "Transmitting or receiving a message on the master interface",
+                			"nl": "Verzenden of ontvangen van een OpenTherm boodschap op de master interface"
+                    }
+              		},
+                  {
+                    "id": "B",
+                    "label": {
+                			"en": "Transmitting or receiving a message on the slave interface",
+                			"nl": "Verzenden of ontvangen van een OpenTherm boodschap op de slave interface"
+                    }
+              		},
+                  {
+                    "id": "O",
+                    "label": {
+                			"en": "Remote setpoint override is active",
+                			"nl": "Doeltemperatuur wordt overschreven"
+                    }
+              		},
+                  {
+                    "id": "F",
+                    "label": {
+                			"en": "Flame is on",
+                			"nl": "Vlam is aan"
+                    }
+              		},
+                  {
+                    "id": "H",
+                    "label": {
+                			"en": "Central heating is on",
+                			"nl": "Verwarming is aan"
+                    }
+              		},
+                  {
+                    "id": "W",
+                    "label": {
+                			"en": "Hot water is on",
+                			"nl": "Tapwater is aan"
+                    }
+              		},
+                  {
+                    "id": "C",
+                    "label": {
+                			"en": "Comfort mode (Domestic Hot Water Enable) is on",
+                			"nl": "Comfort mode (tapwater vraag) is aan"
+                    }
+              		},
+                  {
+                    "id": "E",
+                    "label": {
+                			"en": "Transmission error has been detected",
+                			"nl": "Transmissiefout gedetecteerd"
+                    }
+              		},
+                  {
+                    "id": "M",
+                    "label": {
+                			"en": "Boiler requires maintenance",
+                			"nl": "Ketel heeft onderhoud nodig"
+                    }
+              		},
+                  {
+                    "id": "P",
+                    "label": {
+                			"en": "Thermostat requests a raised power level",
+                			"nl": "Thermostaat vraagt meer stroom"
+                    }
+              		}
+                ],
+                "value": "R"
+              },
+              {
+                "id": "LEDFunctions2",
+                "type": "dropdown",
+                "label": { "en": "Function LED C", "nl": "Functie van LED C" },
+                "values": [
+                  {
+                    "id": "R",
+                    "label": {
+                			"en": "Receiving an OpenTherm message from the thermostat or boiler",
+                			"nl": "Ontvangen van een OpenTherm boodschap door de thermostaat of ketel"
+                    }
+              		},
+                  {
+                    "id": "X",
+                    "label": {
+                			"en": "Transmitting an OpenTherm message to the thermostat or boiler",
+                			"nl": "Verzenden van een OpenTherm boodschap aan de thermostaat of ketel"
+                    }
+              		},
+                  {
+                    "id": "T",
+                    "label": {
+                			"en": "Transmitting or receiving a message on the master interface",
+                			"nl": "Verzenden of ontvangen van een OpenTherm boodschap op de master interface"
+                    }
+              		},
+                  {
+                    "id": "B",
+                    "label": {
+                			"en": "Transmitting or receiving a message on the slave interface",
+                			"nl": "Verzenden of ontvangen van een OpenTherm boodschap op de slave interface"
+                    }
+              		},
+                  {
+                    "id": "O",
+                    "label": {
+                			"en": "Remote setpoint override is active",
+                			"nl": "Doeltemperatuur wordt overschreven"
+                    }
+              		},
+                  {
+                    "id": "F",
+                    "label": {
+                			"en": "Flame is on",
+                			"nl": "Vlam is aan"
+                    }
+              		},
+                  {
+                    "id": "H",
+                    "label": {
+                			"en": "Central heating is on",
+                			"nl": "Verwarming is aan"
+                    }
+              		},
+                  {
+                    "id": "W",
+                    "label": {
+                			"en": "Hot water is on",
+                			"nl": "Tapwater is aan"
+                    }
+              		},
+                  {
+                    "id": "C",
+                    "label": {
+                			"en": "Comfort mode (Domestic Hot Water Enable) is on",
+                			"nl": "Comfort mode (tapwater vraag) is aan"
+                    }
+              		},
+                  {
+                    "id": "E",
+                    "label": {
+                			"en": "Transmission error has been detected",
+                			"nl": "Transmissiefout gedetecteerd"
+                    }
+              		},
+                  {
+                    "id": "M",
+                    "label": {
+                			"en": "Boiler requires maintenance",
+                			"nl": "Ketel heeft onderhoud nodig"
+                    }
+              		},
+                  {
+                    "id": "P",
+                    "label": {
+                			"en": "Thermostat requests a raised power level",
+                			"nl": "Thermostaat vraagt meer stroom"
+                    }
+              		}
+                ],
+                "value": "R"
+              },
+              {
+                "id": "LEDFunctions3",
+                "type": "dropdown",
+                "label": { "en": "Function LED D", "nl": "Functie van LED D" },
+                "values": [
+                  {
+                    "id": "R",
+                    "label": {
+                			"en": "Receiving an OpenTherm message from the thermostat or boiler",
+                			"nl": "Ontvangen van een OpenTherm boodschap door de thermostaat of ketel"
+                    }
+              		},
+                  {
+                    "id": "X",
+                    "label": {
+                			"en": "Transmitting an OpenTherm message to the thermostat or boiler",
+                			"nl": "Verzenden van een OpenTherm boodschap aan de thermostaat of ketel"
+                    }
+              		},
+                  {
+                    "id": "T",
+                    "label": {
+                			"en": "Transmitting or receiving a message on the master interface",
+                			"nl": "Verzenden of ontvangen van een OpenTherm boodschap op de master interface"
+                    }
+              		},
+                  {
+                    "id": "B",
+                    "label": {
+                			"en": "Transmitting or receiving a message on the slave interface",
+                			"nl": "Verzenden of ontvangen van een OpenTherm boodschap op de slave interface"
+                    }
+              		},
+                  {
+                    "id": "O",
+                    "label": {
+                			"en": "Remote setpoint override is active",
+                			"nl": "Doeltemperatuur wordt overschreven"
+                    }
+              		},
+                  {
+                    "id": "F",
+                    "label": {
+                			"en": "Flame is on",
+                			"nl": "Vlam is aan"
+                    }
+              		},
+                  {
+                    "id": "H",
+                    "label": {
+                			"en": "Central heating is on",
+                			"nl": "Verwarming is aan"
+                    }
+              		},
+                  {
+                    "id": "W",
+                    "label": {
+                			"en": "Hot water is on",
+                			"nl": "Tapwater is aan"
+                    }
+              		},
+                  {
+                    "id": "C",
+                    "label": {
+                			"en": "Comfort mode (Domestic Hot Water Enable) is on",
+                			"nl": "Comfort mode (tapwater vraag) is aan"
+                    }
+              		},
+                  {
+                    "id": "E",
+                    "label": {
+                			"en": "Transmission error has been detected",
+                			"nl": "Transmissiefout gedetecteerd"
+                    }
+              		},
+                  {
+                    "id": "M",
+                    "label": {
+                			"en": "Boiler requires maintenance",
+                			"nl": "Ketel heeft onderhoud nodig"
+                    }
+              		},
+                  {
+                    "id": "P",
+                    "label": {
+                			"en": "Thermostat requests a raised power level",
+                			"nl": "Thermostaat vraagt meer stroom"
+                    }
+              		}
+                ],
+                "value": "R"
+              },
+              {
+                "id": "LEDFunctions4",
+                "type": "dropdown",
+                "label": { "en": "Function LED E", "nl": "Functie van LED E" },
+                "values": [
+                  {
+                    "id": "R",
+                    "label": {
+                			"en": "Receiving an OpenTherm message from the thermostat or boiler",
+                			"nl": "Ontvangen van een OpenTherm boodschap door de thermostaat of ketel"
+                    }
+              		},
+                  {
+                    "id": "X",
+                    "label": {
+                			"en": "Transmitting an OpenTherm message to the thermostat or boiler",
+                			"nl": "Verzenden van een OpenTherm boodschap aan de thermostaat of ketel"
+                    }
+              		},
+                  {
+                    "id": "T",
+                    "label": {
+                			"en": "Transmitting or receiving a message on the master interface",
+                			"nl": "Verzenden of ontvangen van een OpenTherm boodschap op de master interface"
+                    }
+              		},
+                  {
+                    "id": "B",
+                    "label": {
+                			"en": "Transmitting or receiving a message on the slave interface",
+                			"nl": "Verzenden of ontvangen van een OpenTherm boodschap op de slave interface"
+                    }
+              		},
+                  {
+                    "id": "O",
+                    "label": {
+                			"en": "Remote setpoint override is active",
+                			"nl": "Doeltemperatuur wordt overschreven"
+                    }
+              		},
+                  {
+                    "id": "F",
+                    "label": {
+                			"en": "Flame is on",
+                			"nl": "Vlam is aan"
+                    }
+              		},
+                  {
+                    "id": "H",
+                    "label": {
+                			"en": "Central heating is on",
+                			"nl": "Verwarming is aan"
+                    }
+              		},
+                  {
+                    "id": "W",
+                    "label": {
+                			"en": "Hot water is on",
+                			"nl": "Tapwater is aan"
+                    }
+              		},
+                  {
+                    "id": "C",
+                    "label": {
+                			"en": "Comfort mode (Domestic Hot Water Enable) is on",
+                			"nl": "Comfort mode (tapwater vraag) is aan"
+                    }
+              		},
+                  {
+                    "id": "E",
+                    "label": {
+                			"en": "Transmission error has been detected",
+                			"nl": "Transmissiefout gedetecteerd"
+                    }
+              		},
+                  {
+                    "id": "M",
+                    "label": {
+                			"en": "Boiler requires maintenance",
+                			"nl": "Ketel heeft onderhoud nodig"
+                    }
+              		},
+                  {
+                    "id": "P",
+                    "label": {
+                			"en": "Thermostat requests a raised power level",
+                			"nl": "Thermostaat vraagt meer stroom"
+                    }
+              		}
+                ],
+                "value": "R"
+              },
+              {
+                "id": "LEDFunctions5",
+                "type": "dropdown",
+                "label": { "en": "Function LED F", "nl": "Functie van LED F" },
+                "values": [
+                  {
+                    "id": "R",
+                    "label": {
+                			"en": "Receiving an OpenTherm message from the thermostat or boiler",
+                			"nl": "Ontvangen van een OpenTherm boodschap door de thermostaat of ketel"
+                    }
+              		},
+                  {
+                    "id": "X",
+                    "label": {
+                			"en": "Transmitting an OpenTherm message to the thermostat or boiler",
+                			"nl": "Verzenden van een OpenTherm boodschap aan de thermostaat of ketel"
+                    }
+              		},
+                  {
+                    "id": "T",
+                    "label": {
+                			"en": "Transmitting or receiving a message on the master interface",
+                			"nl": "Verzenden of ontvangen van een OpenTherm boodschap op de master interface"
+                    }
+              		},
+                  {
+                    "id": "B",
+                    "label": {
+                			"en": "Transmitting or receiving a message on the slave interface",
+                			"nl": "Verzenden of ontvangen van een OpenTherm boodschap op de slave interface"
+                    }
+              		},
+                  {
+                    "id": "O",
+                    "label": {
+                			"en": "Remote setpoint override is active",
+                			"nl": "Doeltemperatuur wordt overschreven"
+                    }
+              		},
+                  {
+                    "id": "F",
+                    "label": {
+                			"en": "Flame is on",
+                			"nl": "Vlam is aan"
+                    }
+              		},
+                  {
+                    "id": "H",
+                    "label": {
+                			"en": "Central heating is on",
+                			"nl": "Verwarming is aan"
+                    }
+              		},
+                  {
+                    "id": "W",
+                    "label": {
+                			"en": "Hot water is on",
+                			"nl": "Tapwater is aan"
+                    }
+              		},
+                  {
+                    "id": "C",
+                    "label": {
+                			"en": "Comfort mode (Domestic Hot Water Enable) is on",
+                			"nl": "Comfort mode (tapwater vraag) is aan"
+                    }
+              		},
+                  {
+                    "id": "E",
+                    "label": {
+                			"en": "Transmission error has been detected",
+                			"nl": "Transmissiefout gedetecteerd"
+                    }
+              		},
+                  {
+                    "id": "M",
+                    "label": {
+                			"en": "Boiler requires maintenance",
+                			"nl": "Ketel heeft onderhoud nodig"
+                    }
+              		},
+                  {
+                    "id": "P",
+                    "label": {
+                			"en": "Thermostat requests a raised power level",
+                			"nl": "Thermostaat vraagt meer stroom"
+                    }
+              		}
+                ],
+                "value": "R"
+              }
+            ]
+        }]
+      },
+      {
+  			"id": "boiler",
+  			"name": {
+  				"en": "Boiler"
+  			},
+  			"class": "sensor",
+        "capabilities": [
+  				"flame_on",
+  				"heating_on",
+          "modulation",
+  				"heating_water",
+  				"fault"
+        ],
+        "mobile": {
+          "components": [
+            {
+              "id": "icon"
+            },
+            {
+              "id": "sensor",
+              "capabilities": [ "flame_on", "heating_on", "modulation", "heating_water", "fault" ],
+              "options": {
+                "icons": {
+                  "flame_on": "./drivers/boiler/assets/flame.svg",
+                  "heating_on": "./drivers/boiler/assets/heat.svg",
+                  "modulation": "./drivers/boiler/assets/modulation.svg",
+                  "heating_water": "./drivers/boiler/assets/water.svg",
+                  "fault": "./drivers/boiler/assets/fault.svg"
+                }
+              }
+            }
+          ]
+        },
+        "pair": [
+          {
+            "id": "select",
+            "navigation": {
+  						"next": "list_sensors"
+  					}
+          },
+          {
+            "id": "list_sensors",
+            "template": "list_devices",
+            "navigation": {
+  						"next": "add_devices"
+  					}
+          },
+          {
+            "id": "add_devices",
+            "template": "add_devices"
+          }
+        ]
+      },
+  		{
+  			"id": "thermostat",
+  			"name": {
+  				"en": "Thermostat",
+  				"nl": "Thermostaat"
+  			},
+  			"class": "thermostat",
+  			"capabilities": [
+  				"target_temperature",
+  				"measure_temperature",
+  				"thermostat_mode"
+  			],
+  			"images": {
+  				"large": "drivers/thermostat/assets/images/large.png",
+  				"small": "drivers/thermostat/assets/images/small.png"
+  			},
+        "pair": [
+          {
+            "id": "select",
+            "navigation": {
+  						"next": "list_sensors"
+  					}
+          },
+          {
+            "id": "list_sensors",
+            "template": "list_devices",
+            "navigation": {
+  						"next": "add_devices"
+  					}
+          },
+          {
+            "id": "add_devices",
+            "template": "add_devices"
+          }
+        ],
+        "settings": [{
+          "type": "group",
+          "label": {
+              "en": "Behavior", "nl": "Gedrag"
+          },
+          "children": [
+            {
+              "id": "temperature",
+              "type": "radio",
+              "label": {
+                "en": "A target temperature setting is",
+                "nl": "Een aanpassing van de doeltemperatuur is"
+              },
+              "values": [
+                {
+                  "id": "temporary",
+                  "label": {
+                    "en": "Temporary (until next program change)",
+                    "nl": "Tijdelijk (tot de volgende programma wijziging)"
+                  }
+                },
+                {
+                  "id": "continuous",
+                  "label": {
+                    "en": "Continous",
+                    "nl": "Permanent"
+                  }
+                }
+              ],
+              "value": "temporary"
+            },
+            {
+              "id": "ventilation",
+              "type": "checkbox",
+              "label": {
+                "en": "Fake ventilation support",
+                "nl": "Emuleer ventilatie ondersteuning"
+              },
+              "hint": {
+                "en": "When turning this on, command 'SR=70:0,0' is sent to the OpenTherm Gateway. This makes the thermostat believe ventilation is supported, which could enable displaying a humidity value on the display.",
+                "nl": "Wanneer dit aangezet is wordt het commando 'SR=70:0,0' naar de OpenTherm Gateway gestuurd. Dit zorgt ervoor dat de thermostaat denkt dat ventilatie ondersteund is. Hiermee kan bijvoorbeeld een vochtigheidswaarde op het scherm getoond worden."
+              },
+              "value": false
+            }]
+          }
+        ]
+      },
+      {
+  			"id": "sensor",
+  			"name": {
+  				"en": "Sensor"
+  			},
+  			"class": "sensor",
+  			"capabilities": [],
+  			"images": {
+  				"large": "drivers/sensor/assets/images/large.png",
+  				"small": "drivers/sensor/assets/images/small.png"
+  			},
+        "pair": [
+          {
+            "id": "select",
+            "navigation": {
+  						"next": "list_sensors"
+  					}
+          },
+          {
+            "id": "list_sensors",
+            "template": "list_devices",
+            "navigation": {
+  						"next": "add_sensor"
+  					}
+          },
+          {
+            "id": "add_sensor"
+          }
+        ]
+  		}
+	 	],
+  	"flow": {
+  		"triggers": [
+  			{
+  				"id": "status",
+  				"title": {
+  					"en": "Status flag gets",
+  					"nl": "Statusvlag wordt"
+  				},
+  				"args": [
+  					{
+  						"name": "values",
+  						"type": "dropdown",
+  						"values": [
+  							{
+  								"id": "on",
+  								"label": {
+  										"en": "active",
+  										"nl": "actief"
+  								}
+  							},
+  							{
+  								"id": "off",
+  								"label": {
+  										"en": "inactive",
+  										"nl": "inactief"
+  								}
+  							}
+  						]
+  					},
+            {
+              "name": "gateway",
+              "type": "device",
+              "filter": "driver_id=gateway"
+            }
+  				],
+  				"tokens": [
+  					{
+  						"name": "flag",
+  						"title": {
+  							"en": "Status flag",
+  							"nl": "Statusvlag"
+  						}
+  					}
+  				]
+  			},
+  			{
+  				"id": "faultcode",
+  				"title": {
+  					"en": "Boiler fault code gets",
+  					"nl": "Ketelstoringscode wordt"
+  				},
+  				"args": [
+  					{
+  						"name": "values",
+  						"type": "dropdown",
+  						"values": [
+  							{
+  								"id": "on",
+  								"label": {
+  										"en": "active",
+  										"nl": "actief"
+  								}
+  							},
+  							{
+  								"id": "off",
+  								"label": {
+  										"en": "inactive",
+  										"nl": "inactief"
+  								}
+  							}
+  						]
+            },
+            {
+              "name": "gateway",
+              "type": "device",
+              "filter": "driver_id=gateway"
+            }
+  				],
+  				"tokens": [
+  					{
+  						"name": "OEM",
+  						"title": {
+  							"en": "OEM code"
+  						}
+  					},
+  					{
+  						"name": "type",
+  						"title": {
+  							"en": "Fault type",
+  							"nl": "Type fout"
+  						}
+  					}
+  				]
+  			},
+  			{
+  				"id": "override",
+  				"title": {
+  					"en": "Room setpoint override gets",
+  					"nl": "Overschrijven kamertemp. wordt"
+  				},
+  				"args": [
+  					{
+  						"name": "values",
+  						"type": "dropdown",
+  						"values": [
+  							{
+  								"id": "on",
+  								"label": {
+  										"en": "active",
+  										"nl": "actief"
+  								}
+  							},
+  							{
+  								"id": "off",
+  								"label": {
+  										"en": "inactive",
+  										"nl": "inactief"
+  								}
+  							}
+  						]
+            },
+            {
+              "name": "gateway",
+              "type": "device",
+              "filter": "driver_id=gateway"
+            }
+  				],
+  				"tokens": [
+  					{
+  						"name": "temp",
+  						"title": {
+  							"en": "Temperature",
+  							"nl": "Temperatuur"
+  						},
+              "type": "number"
+  					}
+  				]
+  			},
+  			{
+  				"id": "command",
+  				"title": {
+  					"en": "Response received",
+  					"nl": "Antwoord ontvangen"
+  				},
+          "args": [
+            {
+              "name": "gateway",
+              "type": "device",
+              "filter": "driver_id=gateway"
+            }
+          ],
+  				"tokens": [
+  					{
+  						"name": "response",
+  						"title": {
+  							"en": "Response",
+  							"nl": "Antwoord"
+  						}
+  					},
+  					{
+  						"name": "result",
+  						"title": {
+  							"en": "Result",
+  							"nl": "Resultaat"
+  						}
+  					}
+  				]
+        }
+  		],
+  		"conditions": [
+  			{
+  				"id": "override",
+  				"title": {
+  					"en": "Remote override is !{{active|inactive}}",
+  					"nl": "Overschrijven kamertemperatuur is !{{aan|uit}}"
+  				},
+          "args": [
+            {
+              "name": "gateway",
+              "type": "device",
+              "filter": "driver_id=gateway"
+            }
+          ]
+  			}
+  		],
+  		"actions": [
+  			{
+  				"id": "setHotWater",
+  				"title": {
+  					"en": "Set hot water mode",
+  					"nl": "Zet tapwater mode"
+  				},
+  				"args": [
+  					{
+  						"name": "mode",
+  						"type": "dropdown",
+  						"values": [
+  							{
+  								"id": "thermostat",
+  								"label": {
+  										"en": "Thermostat controlled",
+  										"nl": "Volg thermostaat"
+  								}
+  							},
+  							{
+  								"id": "on",
+  								"label": {
+  										"en": "Keep water hot",
+  										"nl": "Hou water heet"
+  								}
+  							},
+  							{
+  								"id": "off",
+  								"label": {
+  										"en": "Don't pre-heat",
+  										"nl": "Niet voorverwarmen"
+  								}
+  							}
+  						]
+            },
+            {
+              "name": "gateway",
+              "type": "device",
+              "filter": "driver_id=gateway"
+            }
+  				]
+  			},
+  			{
+  				"id": "setClock",
+  				"title": {
+  					"en": "Set current thermostat time",
+  					"nl": "Zet huidige tijd thermostaat"
+  				},
+  				"args": [
+            {
+              "name": "gateway",
+              "type": "device",
+              "filter": "driver_id=gateway"
+            }
+          ]
+  			},
+  			{
+  				"id": "setOutsideTemperature",
+  				"title": {
+  					"en": "Set outside temperature",
+  					"nl": "Zet buitentemperatuur"
+  				},
+  				"args": [
+  					{
+  						"name": "temperature",
+  						"type": "number",
+  						"min": -20,
+  						"max": 40,
+  						"placeholder": { "en": "In degree celcius", "nl": "In graden celcius" }
+            },
+            {
+              "name": "gateway",
+              "type": "device",
+              "filter": "driver_id=gateway"
+            }
+  				]
+  			},
+  			{
+  				"id": "setRoomHumidity",
+  				"title": {
+  					"en": "Set humidity level",
+  					"nl": "Zet luchtvochtigheid"
+  				},
+  				"args": [
+  					{
+  						"name": "humidity",
+  						"type": "number",
+  						"min": 0,
+  						"max": 100,
+  						"placeholder": { "en": "In percent", "nl": "Als percentage" }
+            },
+            {
+              "name": "gateway",
+              "type": "device",
+              "filter": "driver_id=gateway"
+            }
+  				]
+  			},
+  			{
+  				"id": "sendCommand",
+  				"title": {
+  					"en": "Send Gateway command",
+  					"nl": "Verstuur commando"
+  				},
+  				"args": [
+  					{
+  						"name": "command",
+  						"type": "text",
+  						"placeholder": { "en": "e.g. PR=A" }
+            },
+            {
+              "name": "gateway",
+              "type": "device",
+              "filter": "driver_id=gateway"
+            }
+  				]
+  			}
+  		]
+    },
+  	"permissions": [
+      "homey:manager:speech-input",
+      "homey:manager:speech-output"
     ],
-	"speech": [
-		{
-			"id": "temp",
-			"importance": 0.5,
-			"triggers": {
-				"en": [ "temperature" ],
-				"nl": [ "temperatuur", "kamertemperatuur", "watertemperatuur" ]
-			}
-		},
-		{
-			"id": "room",
-			"importance": 0.5,
-			"triggers": {
-				"en": [ "room" ],
-				"nl": [ "kamer", "kamertemperatuur" ]
-			}
-		},
-		{
-			"id": "boiler",
-			"importance": 0.5,
-			"triggers": {
-				"en": [ "boiler" ],
-				"nl": [ "ketel", "boiler" ]
-			}
-		},
-		{
-			
-			"id": "wrong",
-			"importance": 0.5,
-			"triggers": {
-				"en": [ "wrong", "broken", "error", "fault", "problem" ],
-				"nl": [ "fout", "kapot", "probleem" ]
-			}
-		},
-		{
-			
-			"id": "pressure",
-			"importance": 0.4,
-			"triggers": {
-				"en": [ "pressure" ],
-				"nl": [ "druk" ]
-			}
-		},
-		{
-			
-			"id": "target",
-			"importance": 0.5,
-			"triggers": {
-				"en": [ "target" ],
-				"nl": [ "doel" ]
-			}
-		}
-	],
-	"dependencies": {
-		"otg-api": "*"
-	}
+  	"speech": {
+      "en": {
+        "element": {
+          "actionWords": {
+            "type": "regex",
+            "value": "what\\sis\\sthe"
+          },
+          "error": {
+            "type": "regex",
+            "value": "(problem|fault|error)"
+          },
+          "boiler": {
+            "type": "regex",
+            "value": "(boiler|kettle)"
+          },
+          "wpressure": {
+            "type": "regex",
+            "value": "(water)?(\\s)?pressure"
+          },
+          "wtemp": {
+            "type": "regex",
+            "value": "(water)?(\\s)?temperature"
+          },
+          "ttemp": {
+            "type": "regex",
+            "value": "target\\stemperature"
+          },
+          "rtemp": {
+            "type": "regex",
+            "value": "room\\stemperature"
+          },
+          "thermostat": {
+            "type": "string",
+            "value": "thermostat"
+          }
+        },
+        "group": {
+          "problem": {
+            "set": "(actionWords) && error && boiler",
+            "ordered": false,
+            "allowDisconnect": true,
+            "capturingGroup": true
+          },
+          "pressure": {
+            "set": "(actionWords) && (boiler) && wpressure",
+            "ordered": false,
+            "allowDisconnect": true,
+            "capturingGroup": true
+          },
+          "boilertemp": {
+            "set": "(actionWords) && boiler && wtemp",
+            "ordered": false,
+            "allowDisconnect": true,
+            "capturingGroup": true
+          },
+          "targettemp": {
+            "set": "(actionWords) && (thermostat) && ttemp",
+            "ordered": false,
+            "allowDisconnect": true,
+            "capturingGroup": true
+          },
+          "roomtemp": {
+            "set": "(actionWords) && rtemp",
+            "ordered": false,
+            "allowDisconnect": true,
+            "capturingGroup": true
+          }
+        }
+      },
+      "nl": {
+        "element": {
+          "actionWords": {
+            "type": "regex",
+            "value": "wat\\sis\\s(het|de)"
+          },
+          "error": {
+            "type": "regex",
+            "value": "(probleem|fout)"
+          },
+          "boiler": {
+            "type": "regex",
+            "value": "(boiler|ketel)"
+          },
+          "wpressure": {
+            "type": "regex",
+            "value": "(water)?(\\s)?druk"
+          },
+          "wtemp": {
+            "type": "regex",
+            "value": "(water)?(\\s)?temperatuur"
+          },
+          "ttemp": {
+            "type": "regex",
+            "value": "doel(\\s)?temperatuur"
+          },
+          "thermostat": {
+            "type": "string",
+            "value": "thermostaat"
+          },
+          "rtemp": {
+            "type": "regex",
+            "value": "kamer(\\s)?temperatuur"
+          }
+        }
+      }
+    },
+  	"dependencies": {
+  		"otg-api": "*"
+  	}
 }

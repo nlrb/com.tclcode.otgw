@@ -11,7 +11,7 @@
     "debug": {
       "title": "Debug",
       "log": {
-        "title": "Debug meldingen",
+        "name": "Debug meldingen",
         "level": {
           "title": "Selecteer wat er zichtbaar is",
           "0": "Niks",

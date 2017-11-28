@@ -23,7 +23,7 @@ module.exports = class GatewayDriver extends Homey.Driver {
 
 		/* Start code for backward compatibility */
 		let network = await Homey.ManagerSettings.get('network')
-		if (network.ip && network.port) {
+		if (network && network.ip && network.port) {
 			// We've found (legacy) network app settings; use these as default value
 			socket.emit('try', network)
 		}

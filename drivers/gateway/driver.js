@@ -33,6 +33,9 @@ module.exports = class GatewayDriver extends Homey.Driver {
       if (data && data.ip && data.port) {
         let api = new otgw(Homey.app.locale)
         this.log('Starting search on', data)
+				const tempDebugListener = data => this.log(data.msg)
+				api.setDebug(3) // APP & API
+				api.on('debug', tempDebugListener)
         api.openPort(data.ip, Number(data.port))
 
         const listener = (data) => {
@@ -60,6 +63,7 @@ module.exports = class GatewayDriver extends Homey.Driver {
           socket.emit('available', data)
           // Remove this listener, we don't need it anymore
           api.removeListener('found', listener)
+					api.removeListener('debug', tempDebugListener)
         }
         api.on('found', listener)
       } else {

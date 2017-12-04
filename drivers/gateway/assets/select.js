@@ -27,7 +27,7 @@ function startGatewaySelection(title) {
 			});
 			Homey.emit('selected', gateways[0].id)
 		} else {
-			$('#gatewayList').text(__('pair.add_gateway'));
+			$('#gatewayList').text(__('pair.select.add_gateway'));
 			$('#all').show();
 			Homey.setNavigationClose();
 		}

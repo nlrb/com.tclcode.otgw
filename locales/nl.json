@@ -42,9 +42,23 @@
       },
       "failed": "Het toevoegen van de gateway gaf fout: __detail__"
     },
+    "select": {
+      "name": "Selecteer Gateway",
+      "add_gateway": "Er is nog geen gateway toegevoegd. Voeg eerst een gateway toe."
+    },
+    "boiler": {
+      "title": "Voeg een boiler toe",
+      "explain": "Selecteer de OpenTherm Gateway waar de boiler bij hoort."
+    },
+    "thermostat": {
+      "title": "Voeg een thermostaat toe",
+      "explain": "Selecteer de OpenTherm Gateway waar de thermostaat bij hoort."
+    },
     "sensor": {
+      "title": "Voeg een sensor toe",
+      "explain": "Selecteer de OpenTherm Gateway waar de sensor bij hoort.",
       "add": {
-        "title": "Adding sensor device to Homey"
+        "title": "Sensor wordt toegevoegd als apparaat"
       }
     }
 	},

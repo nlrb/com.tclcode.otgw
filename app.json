@@ -90,6 +90,10 @@
   			},
   			"class": "sensor",
         "capabilities": [ "monitor_mode", "dhw_setting" ],
+        "images": {
+  				"large": "drivers/gateway/assets/images/large.png",
+  				"small": "drivers/gateway/assets/images/small.png"
+  			},
         "mobile": {
           "components": [
             {
@@ -822,6 +826,10 @@
   				"heating_water",
   				"fault"
         ],
+        "images": {
+  				"large": "drivers/boiler/assets/images/large.png",
+  				"small": "drivers/boiler/assets/images/small.png"
+  			},
         "mobile": {
           "components": [
             {
@@ -1016,7 +1024,8 @@
   						"title": {
   							"en": "Status flag",
   							"nl": "Statusvlag"
-  						}
+  						},
+              "example": "Flame"
   					}
   				]
   			},
@@ -1058,14 +1067,16 @@
   						"name": "OEM",
   						"title": {
   							"en": "OEM code"
-  						}
+  						},
+              "example": "0"
   					},
   					{
   						"name": "type",
   						"title": {
   							"en": "Fault type",
   							"nl": "Type fout"
-  						}
+  						},
+              "example": "GasFlame"
   					}
   				]
   			},
@@ -1109,7 +1120,8 @@
   							"en": "Temperature",
   							"nl": "Temperatuur"
   						},
-              "type": "number"
+              "type": "number",
+              "example": 23
   					}
   				]
   			},
@@ -1132,14 +1144,16 @@
   						"title": {
   							"en": "Response",
   							"nl": "Antwoord"
-  						}
+  						},
+              "example": "PR=A: OpenTherm Gateway 4.2.5"
   					},
   					{
   						"name": "result",
   						"title": {
   							"en": "Result",
   							"nl": "Resultaat"
-  						}
+  						},
+              "example": "OpenTherm Gateway 4.2.5"
   					}
   				]
         }

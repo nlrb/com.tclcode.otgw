@@ -27,7 +27,12 @@ module.exports = class ThermostatDevice extends SensorDevice {
       this.once('api_available', async () => { this.registerListeners([
           { var: 'var:CurrentTemperature', func: (val) => { this.targetTempOverride() } },
           { var: 'var:CurrentSetpoint', func: (val) => { this.targetTempOverride() } },
-          { var: 'var:RemoteOverrideRoomSetpoint', func: (val) => { this.targetTempOverride() } }
+          { var: 'var:RemoteOverrideRoomSetpoint', func: (val) => { this.targetTempOverride() } },
+          // For backward compatibility; capabilities not part of current thermostat
+          { var: 'var:StatusFlame', func: (val) => this.setCapabilityValue('flame_on', val).catch(this.error) },
+          { var: 'var:StatusCHMode', func: (val) => this.setCapabilityValue('heating_on', val).catch(this.error) },
+          { var: 'var:StatusDHWMode', func: (val) => this.setCapabilityValue('heating_water', val).catch(this.error) },
+          { var: 'var:StatusFault', func: (val) => this.setCapabilityValue('fault', val).catch(this.error) }
         ])
         // Send ventilation command now if the gateway is available or once it becomes available
         let settings = await this.getSettings()

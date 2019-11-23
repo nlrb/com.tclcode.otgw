@@ -206,6 +206,7 @@ An example how to invoke `getOtgwVars`
 
 
 ### Versions
+* 2.1.0 Fix sensor pairing & UI, which broke due to firmware changes
 * 2.0.0 Complete re-write to Athom SDK v2
   * Adds support for multiple gateways
   * Adds support for changing gateway hardware configuration

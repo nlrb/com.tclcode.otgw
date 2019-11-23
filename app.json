@@ -9,7 +9,7 @@
         "nl": "Bestuur je OpenTherm Gateway met Homey"
     },
     "category": "climate",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "compatibility": ">=1.5.0",
     "author": {
       "name": "Ramón Baas",
@@ -41,46 +41,67 @@
   			"type": "boolean",
   			"title": { "en": "Flame on", "nl": "Vlam aan" },
   			"getable": true,
-  			"setable": false
-  		},
+  			"setable": false,
+        "icon": "/drivers/boiler/assets/flame.svg"
+		  },
   		"heating_on": {
   			"type": "boolean",
   			"title": { "en": "Heating on", "nl": "Verwarming aan" },
   			"getable": true,
-  			"setable": false
+  			"setable": false,
+        "icon": "/drivers/boiler/assets/heat.svg"
   		},
   		"modulation": {
   			"type": "number",
   			"title": { "en": "Modulation", "nl": "Modulatie" },
   			"getable": true,
   			"setable": false,
-        "units": { "en": "%" }
+        "units": { "en": "%" },
+        "icon": "/drivers/boiler/assets/modulation.svg"
   		},
   		"heating_water": {
   			"type": "boolean",
   			"title": { "en": "Heating water", "nl": "Water verwarmen" },
   			"getable": true,
-  			"setable": false
+  			"setable": false,
+        "icon": "/drivers/boiler/assets/water.svg"
   		},
   		"fault": {
   			"type": "boolean",
   			"title": { "en": "Fault", "nl": "Fout" },
   			"getable": true,
-  			"setable": false
+  			"setable": false,
+        "icon": "/drivers/boiler/assets/fault.svg"
       },
   		"percentage": {
   			"type": "number",
   			"title": { "en": "Percentage" },
   			"getable": true,
   			"setable": false,
-        "units": { "en": "%" }
+        "units": { "en": "%" },
+        "icon": "/drivers/sensor/assets/percentage.svg"
       },
   		"counter": {
   			"type": "number",
   			"title": { "en": "Counter", "nl": "Teller" },
   			"getable": true,
-  			"setable": false
-  		}
+  			"setable": false,
+        "icon": "/drivers/sensor/assets/counter.svg"
+  		},
+      "flag": {
+        "type": "boolean",
+        "title": {
+          "en": "Flag"
+        },
+        "getable": true,
+        "setable": false,
+        "uiComponent": "sensor",
+        "icon": "/drivers/sensor/assets/flag.svg",
+        "label": {
+          "true": { "en": "Active", "nl": "Actief" },
+          "false": { "en": "Not active", "nl": "Niet actief" }
+        }
+      }
   	},
   	"drivers": [
       {
@@ -837,16 +858,7 @@
             },
             {
               "id": "sensor",
-              "capabilities": [ "flame_on", "heating_on", "modulation", "heating_water", "fault" ],
-              "options": {
-                "icons": {
-                  "flame_on": "./drivers/boiler/assets/flame.svg",
-                  "heating_on": "./drivers/boiler/assets/heat.svg",
-                  "modulation": "./drivers/boiler/assets/modulation.svg",
-                  "heating_water": "./drivers/boiler/assets/water.svg",
-                  "fault": "./drivers/boiler/assets/fault.svg"
-                }
-              }
+              "capabilities": [ "flame_on", "heating_on", "modulation", "heating_water", "fault" ]
             }
           ]
         },

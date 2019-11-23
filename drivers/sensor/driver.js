@@ -15,8 +15,7 @@ module.exports = class SensorDriver extends Homey.Driver {
     }
   }
 
-	onInit(type) {
-		this.type = type
+	onInit() {
 		this.map = {
 			temperature: 'measure_temperature',
 			pressure: 'measure_pressure',
@@ -29,7 +28,7 @@ module.exports = class SensorDriver extends Homey.Driver {
 	}
 
  	onPair(socket) {
-		this.log('Sensor pairing of type', this.type, 'has started...');
+		this.log('Sensor pairing has started...');
 
 		// Select the OTG
 		socket.on('loaded', () => {
@@ -53,35 +52,23 @@ module.exports = class SensorDriver extends Homey.Driver {
 			for (let s in sensors) {
 				let capability = this.map[sensors[s].type]
 				let device = {
+					// not a real device, put all information in the data element
+					// as that is all that is usable in the list_devices template
 					name: sensors[s].name,
 					data: {
 						id: this.gid + ':' + sensors[s].type + '/' + sensors[s].variable,
 						gid: this.gid,
-						watch: [{ variable: sensors[s].variable, event: capability }] // array for backward compatibility
+						watch: [{ variable: sensors[s].variable, event: capability }], // array for backward compatibility
+						capabilities: [ capability ],
+						capabilitiesOptions: {}
 					},
-					capabilities: [ capability ],
-					capabilitiesOptions: {}
 				}
 				// Change the sensor title name
-				device.capabilitiesOptions[capability] = {}
-				device.capabilitiesOptions[capability].title = sensors[s].allnames
-				// Define custom icons for custom capabilities
-				if (capability === 'percentage' || capability === 'counter') {
-					let mobile = {
-						components: [
-							{ id: 'icon' },
-	            {
-	              id: 'sensor',
-	              capabilities: [ capability ],
-	              options: { icons: {} }
-	            }]
-            }
-					mobile.components[1].options.icons[capability] = './drivers/sensor/assets/' + capability + '.svg'
-					device.mobile = mobile
-				}
+				device.data.capabilitiesOptions[capability] = {}
+				device.data.capabilitiesOptions[capability].title = sensors[s].allnames
 				devices.push(device)
 			}
-			// ALso add Flags
+			// Also add Flags
 			let flagTables = [ 'StatusFlags', 'FaultFlags' ]
 			for (let t in flagTables) {
 				let flags = this.api.getFlagVariables(flagTables[t])
@@ -91,31 +78,12 @@ module.exports = class SensorDriver extends Homey.Driver {
 						data: {
 							id: this.gid + ':' + '/' + f,
 							gid: this.gid,
-							watch: [{ variable: f, event: 'onoff' }] // array for backward compatibility
-						},
-						capabilities: [ 'onoff' ],
-						capabilitiesOptions: { onoff: { title: {} } },
-						mobile: {
-							components: [
-								{ id: 'icon' },
-								{
-									id: 'sensor',
-									capabilities: [ 'onoff' ],
-									options: {
-										icons: { onoff: './drivers/sensor/assets/flag.svg' },
-										onoff: {
-							        noblink: true, // don't blink red
-							        label: {
-						            true: { en: 'Active', nl: 'Actief' },
-								        false: { en: 'Not active', nl: 'Niet actief' }
-								      }
-										}
-									}
-								}
-							]
+							watch: [{ variable: f, event: 'flag' }], // array for backward compatibility
+							capabilities: [ 'flag' ],
+							capabilitiesOptions: { flag: { title: {} } }
 						}
 					}
-					device.capabilitiesOptions.onoff.title = flags[f].allnames
+					device.data.capabilitiesOptions.flag.title = flags[f].allnames
 					devices.push(device)
 				}
 			}

@@ -1,5 +1,8 @@
 {
   "2.1.0": {
     "en": "Fixed sensor pairing"
+  },
+  "2.1.1": {
+    "en": "Fixed condition card bug"
   }
 }

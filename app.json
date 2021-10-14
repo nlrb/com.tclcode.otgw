@@ -1,6 +1,7 @@
 {
     "id": "com.tclcode.otgw",
     "sdk": 2,
+    "brandColor": "#36A38C",
     "name": {
         "en": "OpenTherm Gateway"
     },

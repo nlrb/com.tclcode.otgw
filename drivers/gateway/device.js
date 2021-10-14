@@ -125,7 +125,7 @@ module.exports = class GatewayDevice extends Homey.Device {
      condition
        .register()
        .registerRunListener((args, state) => {
-         let override = api.getValue('RemoteOverrideRoomSetpoint')
+         let override = this.api.getValue('RemoteOverrideRoomSetpoint')
          let active = (override !== undefined && override !== '0.00')
          return Promise.resolve(active)
        })

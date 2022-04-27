@@ -1,0 +1,78 @@
+{
+  "settings": {
+    "name": "OpenTherm Gateway instellingen",
+    "app": {
+      "title": "Applicatie instellingen",
+      "device": {
+        "name": "Apparaat",
+        "duplicates": "Sta toe dat een sensorwaarde in meer dan één sensor kan voorkomen"
+      }
+    },
+    "debug": {
+      "title": "Debug",
+      "log": {
+        "name": "Debug meldingen",
+        "level": {
+          "title": "Selecteer wat er zichtbaar is",
+          "0": "Niks",
+          "1": "Applicatie",
+          "2": "API",
+          "3": "Applicatie & API",
+          "4": "Gateway verkeer",
+          "5": "Applicatie & Verkeer",
+          "6": "API & Verkeer",
+          "7": "Alles"
+        }
+      }
+		}
+  },
+  "pair": {
+    "gateway": {
+      "name": "Toevoegen OpenTherm Gateway",
+      "explain": "De OpenTherm Gateway zal de seriele data communiceren naar Homey via TCP/IP. Daarom moeten hieronder de netwerkinstellingen van de Gateway ingevuld worden.",
+      "network": {
+        "title": "Netwerk instellingen",
+        "ip": "IP adres en poort"
+      },
+      "submit": "Start zoeken naar gateway",
+      "search": {
+        "title": "Zoeken naar de OpenTherm Gateway op __addr__...",
+  			"success": "De OpenTherm Gateway is gevonden. De instellingen zijn opgeslagen.",
+  			"failed": "De OpenTherm Gateway kan niet gevonden worden op __addr__!"
+      },
+      "failed": "Het toevoegen van de gateway gaf fout: __detail__"
+    },
+    "select": {
+      "name": "Selecteer Gateway",
+      "add_gateway": "Er is nog geen gateway toegevoegd. Voeg eerst een gateway toe."
+    },
+    "boiler": {
+      "title": "Voeg een boiler toe",
+      "explain": "Selecteer de OpenTherm Gateway waar de boiler bij hoort."
+    },
+    "thermostat": {
+      "title": "Voeg een thermostaat toe",
+      "explain": "Selecteer de OpenTherm Gateway waar de thermostaat bij hoort."
+    },
+    "sensor": {
+      "title": "Voeg een sensor toe",
+      "explain": "Selecteer de OpenTherm Gateway waar de sensor bij hoort.",
+      "add": {
+        "title": "Sensor wordt toegevoegd als apparaat"
+      }
+    }
+	},
+	"speech": {
+		"room_temp": "De kamertemperatuur is nu __arg__ graden.",
+		"room_target": "De thermostaat staat ingesteld op __arg__ graden.",
+		"boiler_temp": "De ketelwatertemperatuur is nu __arg__ graden.",
+		"pressure": "De keteldruk is nu __arg__ bar.",
+		"dont_know": "Het spijt me, maar dat weet ik niet.",
+		"no_error": "Voor zover ik weet werkt de ketel naar behoren.",
+		"has_error": "De ketel raporteert een __error__.",
+		"has_errors": "De ketel heeft __cnt__ foutmeldingen, namelijk __errors__."
+	},
+  "error": {
+    "gateway_unavailable": "Fout: de gateway is niet beschikbaar"
+  }
+}

@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+	<head>
+		<style>
+			.message {
+				background: #f8f8f8;
+				display: none;
+			}
+			.message-bar {
+				font-style: italic;
+				font-weight: bolder;
+			}
+			.oneline {
+				display: inline-flex;
+				align-items: center;
+			}
+			.network-input {
+				margin-left: 10px;
+			}
+			.network-ip {
+				width: 100px;
+			}
+			.network-port {
+				width: 40px;
+			}
+			.network .ng-invalid{
+				border: 1px solid red;
+			}
+			.debug {
+				font-family: monospace;
+				font-size: 11px;
+				line-height: 12px;
+			}
+			.debug td {
+				padding-right: 8px;
+				vertical-align: top;
+			}
+			input[type="radio"]:not(:checked)+label{ font-weight: lighter; }
+		</style>
+		<link rel="stylesheet" type="text/css" href="/manager/devices/devicesettings/css/devicesettings.css">
+		<script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+		<script type="text/javascript" src="/manager/webserver/assets/js/angular.js"></script>
+		<script>
+		  var Homey
+			angular.module('OtgSettingsApp', [])
+			.controller('SettingsCtrl', ['$scope', '$timeout', function($scope, $timeout) {
+				$scope.foundOTG = false;
+				$scope.message = '';
+				$scope.collapse = { app: false, debug: true };
+				$scope.duplicates = false;
+				$scope.debugLevels = []
+				for (let i = 0; i < 8; i++) {
+					$scope.debugLevels.push({name: __('settings.debug.log.level.' + i), id: i})
+				}
+				$scope.debugLevel = $scope.debugLevels[1]; // App
+				$scope.debugLog = [];
+				$scope.config = {};
+				$scope.msgPromise;
+
+				// Toggle the collapse for an element and save it as a setting in Homey
+				$scope.toggleCollapse = function(element) {
+					$scope.collapse[element] = !$scope.collapse[element];
+					Homey.set('collapse', $scope.collapse); // ignore failure
+				}
+
+				// Display message to the user
+				$scope.displayMessage = function(text) {
+					if ($scope.msgPromise != null) {
+						$timeout.cancel($scope.msgPromise);
+					}
+					$scope.$apply(function() {
+						$scope.message = text;
+					});
+					$(".message").slideDown();
+					$scope.msgPromise = $timeout(function() {
+						$scope.message = '';
+						$(".message").slideUp();
+					}, 5000);
+				}
+
+				$scope.appChange = function() {
+					Homey.set('app', { duplicates: $scope.duplicates }); // ignore failure
+				}
+
+				$scope.levelChange = function() {
+					Homey.set('logLevel', $scope.debugLevel.id); // ignore failure
+				}
+
+				// Read the application settings
+				$scope.getAppSettings = function() {
+					Homey.get('collapse', function(err, value) {
+						if (value) {
+							for (key in value) {
+								$scope.collapse[key] = value[key];
+							}
+							$scope.$apply();
+					}
+					});
+					Homey.get('app', function(err, value) {
+						if (value) {
+							$scope.duplicates = value.duplicates;
+							$scope.$apply();
+					}
+					});
+					Homey.get('logLevel', function(err, value) {
+						if (value) {
+							$scope.debugLevel = $scope.debugLevels[value];
+							$scope.$apply();
+						}
+					});
+				}
+
+				$scope.getAppSettings();
+
+				// Actions for back-end triggers
+				Homey.on('debug', function(data) {
+					$scope.debugLog = data;
+					$scope.$apply();
+				});
+			}]);
+
+			function onHomeyReady(homey){
+				Homey = homey
+				angular.bootstrap(document, ['OtgSettingsApp']);
+				Homey.ready();
+			}
+		</script>
+	</head>
+
+	<body ng-controller="SettingsCtrl">
+		<fieldset id="message" class="message">
+			<legend>Message</legend>
+			<div class="message-bar">
+				{{message}}
+			</div>
+		</fieldset>
+		<div id="application">
+			<h1 data-i18n="settings.app.title"></h1>
+			<fieldset ng-class="{ 'collapsed': collapse.app }">
+				<legend data-i18n="settings.app.device.name" ng-click="toggleCollapse('app')"></legend>
+				<form name="appForm" ng-show="!collapse.app">
+					<div class="oneline">
+						<label style="padding-right:10px" data-i18n="settings.app.device.duplicates"></label>
+						<input type="checkbox" ng-model="duplicates" ng-change="appChange()">
+					</div>
+				</form>
+			</fieldset>
+		</div>
+		<div id="debug">
+			<h1 data-i18n="settings.debug.title"></h1>
+			<fieldset ng-class="{ 'collapsed': collapse.debug }">
+				<legend data-i18n="settings.debug.log.name" ng-click="toggleCollapse('debug')"></legend>
+				<form name="debugForm" ng-show="!collapse.debug">
+					<div class="oneline">
+						<label style="padding-right:10px" for="debugLevel" data-i18n="settings.debug.log.level.title"></label>
+						<select ng-model="debugLevel" ng-options="x.name for x in debugLevels track by x.id" ng-change="levelChange()"></select>
+					</div>
+				</form>
+				<table class="debug" ng-show="!collapse.debug">
+					<tr ng-repeat="item in debugLog">
+						<td>{{item.time}}</td><td>{{item.msg}}</td>
+					</tr>
+				</table>
+			</fieldset>
+		</div>
+	</body>
+</html>

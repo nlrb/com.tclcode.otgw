@@ -1,0 +1,34 @@
+<script>
+  /*
+     Note: depends on implementation of 'list_devices' template
+     Uses variables 'selected_devices' (not 'found_devices')
+  */
+  Homey.setTitle(__('pair.sensor.add.title'))
+  var devs = window.selected_devices
+  var device = {
+    name: 'OTG Sensor',
+    data: { id: 'OTG:Sensor', watch: [] },
+    capabilities: [],
+    capabilitiesOptions: {}
+  }
+  if (devs && devs.length > 0) {
+    for (let i = 0; i < devs.length; i++) {
+      let item = JSON.parse(devs[i])
+      let id = item.id
+      //console.log(item)
+      device.data.id += '/' + item.watch[0].variable
+      device.data.gid = item.gid // all devices have the same gateway
+      device.data.watch = device.data.watch.concat(item.watch.map(x =>
+        { return { variable: x.variable, event: x.event + '.' + i }})
+      )
+      device.capabilities = device.capabilities.concat(item.capabilities.map(x => x + '.' + i))
+      for (let k in item.capabilitiesOptions) {
+        device.capabilitiesOptions[k + '.' + i] = item.capabilitiesOptions[k]
+      }
+    }
+    //console.log(device)
+    Homey.addDevice(device, () => {
+      Homey.done()
+    })
+  }
+</script>

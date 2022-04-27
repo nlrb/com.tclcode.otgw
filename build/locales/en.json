@@ -1,0 +1,82 @@
+{
+  "settings": {
+    "name": "OpenTherm Gateway settings page",
+    "app": {
+      "title": "Application settings",
+      "device": {
+        "name": "Device",
+        "duplicates": "Allow sensor values to appear in more than one sensor device"
+      }
+    },
+    "debug": {
+      "title": "Debug",
+      "log": {
+        "name": "Debug log entries",
+        "level": {
+          "title": "Select the debugging log level",
+          "0": "None",
+          "1": "Application",
+          "2": "API",
+          "3": "Application & API",
+          "4": "Gateway traffic",
+          "5": "Application & Traffic",
+          "6": "API & Traffic",
+          "7": "All"
+        }
+      }
+    }
+	},
+  "pair": {
+    "gateway": {
+      "name": "Add OpenTherm Gateway Device",
+      "explain": "The OpenTherm Gateway is expected to communicate the serial data via TCP/IP. You will need to define the IP address and port on your network where the Gateway can be found.",
+      "network": {
+        "title": "Network settings",
+        "ip": "IP Address and port"
+      },
+      "submit": "Start gateway search",
+      "search": {
+        "title": "Searching for OpenTherm Gateway on __addr__...",
+  			"success": "Found your OpenTherm Gateway. Settings have been saved.",
+  			"failed": "Unable to locate the OpenTherm Gateway on __addr__!"
+      },
+      "failed": "Adding the device failed with error: __detail__"
+    },
+    "select": {
+      "name": "Gateway selection",
+      "add_gateway": "No gateway device has been paired yet. Please add a gateway device first."
+    },
+    "select": {
+      "name": "Selecteer Gateway",
+      "add_gateway": "Er is nog geen gateway toegevoegd. Voeg eerst een gateway toe."
+    },
+    "boiler": {
+      "title": "Add a boiler device",
+      "explain": "Please select which OpenTherm Gateway the boiler belongs to."
+    },
+    "thermostat": {
+      "title": "Add a thermostat device",
+      "explain": "Please select which OpenTherm Gateway the thermostat belongs to."
+    },
+    "sensor": {
+      "title": "Add a sensor device",
+      "explain": "Please select which OpenTherm Gateway the sensor belongs to.",
+      "add": {
+        "title": "Adding sensor device to Homey"
+      }
+    }
+  },
+	"speech": {
+		"room_temp": "The room temperature is now __arg__ degrees.",
+		"room_target": "The thermostat target temperature is set to __arg__ degrees.",
+		"boiler_temp": "The boiler water temperature is now __arg__ degrees.",
+		"pressure": "The boiler water pressure is now __arg__ bar.",
+		"dont_know": "I'm sorry. I don't have that information.",
+		"no_error": "As far as I'm aware, the boiler is working perfectly fine.",
+		"has_error": "The boiler reports a __error__.",
+		"has_errors": "The boiler has __cnt__ errors, namely __errors__."
+	},
+  "error": {
+    "gateway_unavailable": "Error: the gateway is not available"
+  }
+}

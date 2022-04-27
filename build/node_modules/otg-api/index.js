@@ -1,0 +1,804 @@
+'use strict'
+
+const net = require('net'),
+      rl  = require('readline'),
+      otg = require('./lib/otg_const'),
+      ot  = require('./lib/ot_msg'),
+      otf = require('./lib/ot_func'),
+      EventEmitter = require('events')
+
+
+const API_DBG = 0x2
+const OTG_DBG = 0x4
+
+/**
+ ** OTGateway - Main class to communicate with an OpenTherm Gateway
+ ** @event debug {object}
+ ** @event found {boolean}
+ ** @event available - same as found:true
+ ** @event unavailable - same as found: false
+ ** @event response {string} response {string} parsed response
+ ** @event config {object}
+ ** @event msg:<x> (data)
+ ** @event var:<x> (variable, value)
+ */
+
+module.exports = class OTGateway extends EventEmitter {
+  /**
+   ** Create a new gateway instance
+   ** @param {string} locale - language of user messages
+   */
+  constructor(locale) {
+    super()
+    this.ip = { addr: 'none', port: 0 }
+    this.locale  = ['nl', 'en'].indexOf(locale) > -1 ? locale : 'en'
+    this.client                // Net client
+    this.waitTimer
+    this.searchTimer
+    this.reconnectTimer
+    this.responseQueue = []    // Queue of message we expect a response to
+    this.userResponse = false  // expecting a response to a user defined command
+    this.found = false         // True once an OpenTherm Gateway has been found
+    this.searching = false     // Searching for OTG is in progress
+    this.values = {}           // Values for all OpenTherm message values
+    this.config = {}           // Configuration settings of the OTG
+    this.msg_supported = {}    // Will fill with supported messages
+    this.searchCnt             // Nr of tries to find OTG
+    this.fwMajorVersion = 3    // Major nr of the OTG firmware
+    this.gatewayMode = false   // false: Monitor mode; true: Gateway mode
+
+    otgRegisterListeners(this)
+  }
+
+  debug(level, ...args) {
+    let result = otf.debug(level, '[' + this.ip.addr + ':' + this.ip.port + ']', ...args)
+    if (result) {
+      this.emit('debug', result)
+    }
+  }
+
+  setDebug(level, bufSize) {
+    otf.setDebug(level, bufSize)
+  }
+
+  /**
+   ** @param {string} ip - IP address of the OTG
+   ** @param {int} port - IP port number of the OTG
+   */
+  openPort(ip, port) {
+    if (this.found && !this.reconnectTimer) {
+			// We already found an OTG on this IP; re-connect to this every 30 seconds
+			this.reconnectTimer = setInterval(() => {
+				this.debug(API_DBG, 'Re-connecting to ' + this.ip.addr + ':' + this.ip.port)
+				this.openPort(this.ip.addr, this.ip.port)
+			}, 30000)
+		}
+
+    this.found = false;
+		this.searchCnt = 0; // openPort always triggers a new search
+
+		this.debug(API_DBG, 'Starting search on', ip + ':' + port)
+		if (this.client) {
+			this.client.destroy()
+		}
+		let ok = ip !== undefined && port !== undefined
+		if (ok) {
+			this.client = new net.Socket()
+			this.client.setTimeout(60000)  // there should be communication at least once a minute
+
+			// Setup a timer that we don't wait too long while searching
+			this.waitTimer = setTimeout(() => {
+				this.debug(API_DBG, 'Search timed out')
+				this.client.destroy()
+				this.emit('found', { found: false })
+			}, 20000);
+
+			// Register main response handler
+			let line = rl.createInterface(this.client, this.client)
+			line.on('line', (data) => {
+				clearTimeout(this.waitTimer)
+				otgProcessData(this, data)
+			})
+
+			// Error handler; likely the OTG was not found on the given ip:port
+			this.client.on('error', (err) => {
+				this.debug(API_DBG, 'Socket error:', err)
+				if (!this.found) {
+					clearTimeout(this.waitTimer);
+					this.client.destroy()
+					this.emit('found', { found: false })
+				}
+			})
+
+			this.client.on('timeout', () => {
+				this.debug(API_DBG, 'Connecion timed out.')
+				this.client.destroy()
+			})
+
+			// Handle closed connections, try to re-open it
+			this.client.on('close', () => {
+				this.debug(API_DBG, 'Connecion closed (found =', this.found + ')');
+				if (this.found) {
+					// Connection dropped, try to re-connect
+					this.openPort(this.ip.addr, this.ip.port)
+				}
+			})
+
+      // Connect to the OTG
+			this.client.connect(port, ip, () => {
+				this.debug(API_DBG, 'Connected to', ip + ':' + port)
+				this.ip = { addr: ip, port: port }
+				// Kill the re-try timer
+				clearTimeout(this.reconnectTimer)
+        this.reconnectTimer = undefined
+				// Search for the OTG
+				this.search(false)
+			});
+		}
+		return ok
+  }
+
+  /**
+   ** Close the connection
+   */
+  closePort() {
+    this.found = false
+    this.client.end()
+    this.emit('unavailable')
+  }
+
+  /**
+   ** Check if we have found an OTG (true/false)
+   */
+  checkFound() {
+    return this.found
+  }
+
+  /**
+   ** Get an OTG variable raw value
+   ** @param variable {string} - Variable name (see otg_const)
+   */
+	getValue(variable) {
+		return this.values[variable]
+	}
+
+  /**
+   ** Update variable value if needed and emit an event
+   ** @param name {string} - Variable name (see otg_const)
+   ** @param newValue {} - The new variable value
+   ** @param forced {boolean} - If true, update even if the value has not changed
+   */
+  setValue(name, newValue, forced) {
+  	if (name !== undefined && newValue !== undefined && (this.values[name] !== newValue || forced)) {
+  		this.values[name] = newValue
+  		this.debug(API_DBG, 'Updating value of', name, 'to', newValue)
+      this.emit('var:' + name, newValue)
+  	}
+  }
+
+  /**
+   ** Get list of sensors of type <type> that are supported by the boiler
+   ** types: 'temperature'/'pressure'/'humidity'/'percentage'/'co2'/'counter'
+   ** @param type {string} - Type of sensor (if undefined, lists all types)
+   */
+  //
+	getAvailableSensors(type) {
+		let devices = []
+		let cnt = 0
+		for (let nr in ot.Messages) {
+			let msg = ot.Messages[nr]
+			// If type is not defined, show all types, but only if the message already has a value.
+			// We want to prevent to show sensors that are not supported by either boiler or thermostat.
+			if (((type === undefined && msg.sensor !== undefined) || (type !== undefined && msg.sensor === type))
+        && this.values[msg.var] !== undefined) {
+				devices[cnt++] = {
+          type: msg.sensor,
+					variable: msg.var,
+          name: msg[this.locale] || msg.en,
+          allnames: { en: msg.en, nl: msg.nl },
+          last: this.values[msg.var]
+        }
+			}
+		}
+		return devices
+  }
+
+  /**
+   ** Set the thermostat target temperature
+   ** @param value {float} - Target temperature in degrees celcius
+   ** @param permanent {boolean} - If true temperature is permanent, otherwise it changes at next program change
+   ** @return {Promise} Success: resolves to true or rejects with Error
+   */
+	setThermostatTargetTemp(value, permanent) {
+		return new Promise((resolve, reject) => {
+      if (this.gatewayMode) {
+			  let cmd = permanent ? 'TC=' : 'TT=' // constant or temporary temperature
+			  resolve(this.writeCommand(cmd + value))
+		  } else {
+        reject(new Error('Not in gateway mode'))
+      }
+    })
+	}
+
+  /**
+   ** Set the thermostat target temperature
+   */
+	getThermostatOverrideActive() {
+		return this.values.RemoteOverrideRoomSetpoint !== undefined && this.values.RemoteOverrideRoomSetpoint !== 0
+	}
+
+  /**
+   ** Set the mode of the thermostat: auto = resume program
+   ** @return {Promise} Success: resolves to true or rejects with Error
+   */
+	setThermostatAuto() {
+    return new Promise((resolve, reject) => {
+  		if (this.gatewayMode) {
+  			resolve(this.writeCommand('TT=0'))
+      } else {
+        reject(new Error('Not in gateway mode'))
+      }
+    })
+	}
+
+  /**
+   ** Send time and date to the thermostat
+   ** @return {Promise} Success: resolves to true or rejects with Error
+   */
+	setThermostatClock(date) {
+    return new Promise((resolve, reject) => {
+  		this.debug(API_DBG, 'setClock')
+  		if (date == null) {
+  			date = new Date()
+  		}
+  		if (this.gatewayMode) {
+  			let now = {
+  				day: date.getDate(), wday: date.getDay(), month: date.getMonth(), year: date.getFullYear(),
+  				hour: date.getHours(), min: date.getMinutes(), sec: date.getSeconds()
+  			}
+  			let dow = now.wday === 0 ? 7 : now.wday
+        if (this.fwMajorVersion >= 4) { // SR command only available from FW4
+  				this.writeCommand('SR=21:' + now.month + ',' + now.day)
+  				let hb = Math.floor(now.year / 0x100)
+  				let lb = now.year % 0x100
+  				this.writeCommand('SR=22:' + hb + ',' + lb)
+  			}
+  			resolve(this.writeCommand('SC=' + now.hour + ':' + ('0' + now.min).slice(-2) + '/' + dow))
+      } else {
+        reject(new Error('Not in gateway mode'))
+      }
+    })
+	}
+
+  /**
+   ** Get the state of the boiler (e.g. flame state)
+   */
+	getBoilerState() {
+		let state = {
+      fault: this.getValue('StatusFault'),            // 0x0001
+      mode_ch: this.getValue('StatusCHMode'),         // 0x0002
+      mode_dhw: this.getValue('StatusDHWMode'),       // 0x0004
+      flame: this.getValue('StatusFlame'),            // 0x0008
+      cooling: this.getValue('StatusCooling'),        // 0x0010
+      mode_ch2: this.getValue('StatusCH2Mode'),       // 0x0020
+      diagnostic: this.getValue('StatusDiagnostic'),  // 0x0040
+      enab_ch: this.getValue('StatusCHEnabled'),      // 0x0100
+      enab_dhw: this.getValue('StatusDHWEnabled'),    // 0x0200
+      enab_cool: this.getValue('StatusCoolEnabled'),  // 0x0400
+      actv_otc: this.getValue('StatusOTCActive'),     // 0x0800
+      enab_ch2: this.getValue('StatusCH2Enabled'),    // 0x1000
+      winter: this.getValue('StatusSummerWinter'),    // 0x2000
+      dhwblock: this.getValue('StatusDHWBlocked')     // 0x4000
+		}
+		return state
+	}
+
+  /**
+   ** Get the setting of domestic hot water enable
+   */
+  getBoilerHotWater() {
+    const dhw_t = { A: 'thermostat', '0': 'off', '1': 'on' }
+    let result
+    if (this.config.DHWSetting !== undefined) {
+      result = dhw_t[this.config.DHWSetting.val]
+    }
+    return result
+  }
+
+  /**
+   ** Control the domestic hot water enable option
+   ** @param {string} mode - Either 'on', 'off' or 'thermostat'
+   ** @return {Promise} Success: resolves to true or rejects with Error
+   */
+	setBoilerHotWater(mode) {
+    return new Promise((resolve, reject) => {
+      if (this.gatewayMode) {
+        const dhw_t = { thermostat: 'A', off: '0', on: '1' }
+    		this.debug(API_DBG, 'setBoilerHotWater', mode, dhw_t[mode])
+        let result = dhw_t[mode] !== undefined
+    		if (result) {
+          this.debug(API_DBG, 'writing HW=' + dhw_t[mode])
+    			resolve(this.writeCommand('HW=' + dhw_t[mode]))
+    		} else {
+          reject(new Error('Unknown mode: ' + mode))
+        }
+      } else {
+        reject(new Error('Not in gateway mode'))
+      }
+    })
+	}
+
+  /**
+   ** Use e.g. another sensor to set the outside temperature
+   ** @param {float} temperature - Temperature as measured outside
+   ** @return {Promise} Success: resolves to true or rejects with Error
+   */
+	setOutsideTemperature(temperature) {
+		this.debug(API_DBG, 'setOutsideTemperature', temperature)
+    return new Promise((resolve, reject) => {
+      if (this.gatewayMode) {
+    		if (temperature !== undefined) {
+    			resolve(this.writeCommand('OT=' + temperature)) // Outside temperature
+        } else {
+          reject(new Error('Invalid temperature: ' + temperature))
+        }
+      } else {
+        reject(new Error('Not in gateway mode'))
+      }
+    })
+	}
+
+  /**
+   ** Use e.g. another sensor to update the measured humidity
+   ** @param {float} humidity - Humidity as measured near the thermostat
+   ** @return {Promise} Success: resolves to true or rejects with Error
+   */
+	setRoomHumidity(humidity) {
+		this.debug(API_DBG, "setRoomHumidity", humidity)
+    return new Promise((resolve, reject) => {
+      if (this.gatewayMode) {
+        if (humidity !== undefined) {
+  			  resolve(this.writeCommand('SR=78:' + humidity + ',0')) // Outside temperature
+        } else {
+          reject(new Error('Invalid humidity: ' + humidity))
+        }
+      } else {
+        reject(new Error('Not in gateway mode'))
+      }
+    })
+	}
+
+  /**
+   ** Send a free-format command; result is emitted (via 'response') when received
+   ** @param {string} command - Send a (known) command to the OTG (e.g. 'PR=V')
+   ** @return {Promise} Success: resolves to true or rejects with Error
+   */
+	sendCommand(command) {
+    return new Promise((resolve, reject) => {
+  		if (command !== undefined) {
+  			let cmd = command.substr(0, 2)
+  			if (command[2] === '=' && otg.Commands.indexOf(cmd) >= 0) { // Valid OTG command
+  				resolve(this.writeCommand(command, true))
+  			} else {
+          reject(new Error('Invalid command: ' + command))
+        }
+  		} else {
+        reject(new Error('Command is undefined'))
+      }
+    })
+	}
+
+  /**
+   ** Read Gateway settings to store them locally
+   */
+  requestSettings() {
+  	for (let i = 0; i < otg.Startup.length; i++) {
+  		let item = otg.Startup[i]
+  		if (otg.Config[item] && otg.Config[item].rep) {
+  			let cmd = 'PR=' + otg.Config[item].rep
+  			this.writeCommand(cmd, item)
+  		}
+  	}
+  }
+
+  /**
+   ** Search for an OpenTherm Gateway
+   */
+  search() {
+  	if (this.searchCnt++ < 3) {
+  		this.writeCommand('PR=' + otg.Config.VER.rep, 'VER')
+  		this.searchTimer = setTimeout(() => this.search(), 1000)
+  		this.debug(API_DBG, 'Search attempt', this.searchCnt)
+  	} else {
+  		this.emit('found', { found: false })
+  	}
+  }
+
+  /**
+   ** Write a message to the OTG
+   ** @param cmd {string|int} - command to send; or: number of command in queue to send
+   ** @param response {undefined|string|boolean}
+   ** @return {Promise}
+   **/
+  writeCommand(cmd, response) {
+    let result = new Promise((resolve, reject) => {
+      if (response === true) {
+        this.userResponse = true
+        this.client.write(cmd + '\r')
+        this.debug(API_DBG, 'Sent free-format command', cmd)
+        // TODO: hanlde free-format Promise
+        resolve(true)
+      } else {
+        if (cmd !== undefined) {
+          let msg = cmd
+          if (typeof cmd === 'number') {
+            msg = this.responseQueue[cmd].sent
+            response = this.responseQueue[cmd].resp
+            resolve = this.responseQueue[cmd].promise.resolve
+            reject = this.responseQueue[cmd].promise.reject
+          }
+      		this.client.write(msg + '\r')
+      		this.debug(API_DBG, 'Sent command', msg)
+      		if (response === undefined) {
+      			if (this.fwMajorVersion >= 4) {
+      				response = cmd.replace(/=/, ': ')
+      				response = response.replace(/,/g, '/')
+      			} else {
+      				response = 'OK'
+      			}
+          }
+          if (typeof cmd === 'number') {
+            this.responseQueue[cmd].when = new Date()
+          } else {
+      	    this.responseQueue.push({ sent: cmd, resp: response, when: new Date(), promise: { resolve: resolve, reject: reject }})
+      		}
+        } else {
+          reject(new Error('No command given'))
+        }
+      }
+    })
+    return result
+  }
+
+  /**
+   ** Check whether the OTG is in (false) monitoring mode or (true) gateway mode
+   */
+  getGatewayMode() {
+    return this.gatewayMode
+  }
+
+  /**
+   ** Set OTG operation mode
+   ** @param {boolean} mode - false: monitor only; true: gateway mode
+   ** @return {Promise} Success: resolves to true or rejects with Error
+   */
+  setGatewayMode(mode) {
+    return this.writeCommand(otg.Config.GW.cmd + '=' + (mode ? '1' : '0'), otg.Config.GW.rep)
+  }
+
+  /**
+   ** Get OTG configuration text & settings
+   */
+	getGatewayConfig() {
+		return this.config
+	}
+
+  /**
+   ** Update local config & write new configuration to the OTG
+   ** @param {object} updates - Array or object with var/val pairs, e.g. [{ var: 'LEDFunctions3', val: 'P' }]
+   */
+	setGatewayConfig(updates) {
+    // Check if the setting has really changed, minimize writes to the OTG
+		let dirty = []
+		for (let id in updates) {
+			let variable = updates[id].var
+			let value = updates[id].val
+			if (value !== undefined && this.config[variable] != value) {
+				this.debug(API_DBG, variable, '=', value)
+				//this.config[variable] = value
+				dirty.push({ var: variable, val: value })
+			}
+		}
+		// Write new configuration settings
+		if (this.found && dirty.length > 0) {
+      let updates = []
+      for (let i = 0; i < dirty.length; i++) {
+        let variable = dirty[i].var
+        let info = this.config[variable]
+        if (info.mod) { // Check if the setting is modifiable
+          // Search for the command
+          let source = this.config[variable].src.split('=')
+          this.debug(API_DBG, source, source[0].slice(4))
+          let table = otg.ConfigResponse[source[0].slice(4)] // remove 'PR: ' and lookup
+          let cmd = otg.Config[table].cmd
+          // Check if the variable is part of of a multi-count settings
+          if (otg.Config[table].cnt) {
+            let nr = Number(variable.slice(-1))
+            cmd = cmd.replace(/<(.)>/, function(x) { return String.fromCharCode(x[1].charCodeAt(0) + nr) })
+          }
+          cmd += '=' + dirty[i].val
+          updates.push({ set: cmd, check: 'PR=' + otg.Config[table].rep, resp: table })
+        }
+      }
+      for (let i = 0; i < updates.length; i++) {
+        this.writeCommand(updates[i].set) // update the setting
+        this.writeCommand(updates[i].check, updates[i].resp) // read the setting
+      }
+		}
+	}
+
+	getGatewayVariables() {
+		return this.values
+	}
+
+  getSupportHeating2() {
+    return this.msg_supported[23]
+  }
+
+	// Return list of variables than can be watched
+	getAvailableVariables() {
+		let list = [];
+		// Using values table to include override values
+		for (let v in this.values) {
+			let item = this.getVariableDetails(v)
+			if (item !== undefined) {
+				let text = item.data[this.locale]
+				list.push({ id: item.idx, var: v, txt: text })
+			}
+		}
+		return list
+	}
+
+	// Get variables from a flag table
+	getFlagVariables(name) {
+		let set = {}
+    if (name !== undefined) {
+  		if (name.slice(-5) === 'Flags' && ot[name] !== undefined) {
+  			for (let item in ot[name]) {
+  				set[ot[name][item].var] = {
+            name: ot[name][item][this.locale] || ot[name][item].en,
+            allnames: { en: ot[name][item].en, nl: ot[name][item].nl }
+          }
+  			}
+  		}
+    }
+		return set
+	}
+
+	// Get all information related to a variable (i.e. OpenTherm details)
+	getVariableDetails(name) {
+		// Variable names are unique over all tables, so return the first one we find
+		for (let tab in ot) {
+			for (let item in ot[tab]) {
+				let entry = ot[tab][item]
+				if (entry.var !== undefined && (entry.var === name || entry.var.lb === name || entry.var.hb === name)) {
+					let idx = tab === 'Messages' ? ('000' + item).slice(-3) : '#' + tab + '.' + item // flags on top
+					return { idx: idx, data: entry }
+				}
+			}
+		}
+	}
+
+}
+
+
+// Add a configuration setting we just found
+function otgAddConfig(context, idx, val, source) {
+	let name = otg.Config[idx].var
+	let tab = otg.Config[idx].tab
+	let cnt = otg.Config[idx].cnt
+	let loop = cnt || 1
+	context.debug(API_DBG, 'Setting read:', name, '=', val)
+	for (let i = 0; i < loop; i++) {
+		let txtVal = val
+		let txtName = otg.Config[idx][context.locale]
+		let itemVal = val
+		let itemName = name
+		if (cnt !== undefined) {
+			itemName = name + i
+			itemVal = val[i]
+			txtName = txtName.replace(/<(.)>/, function(x) { return String.fromCharCode(x[1].charCodeAt(0) + i) })
+		}
+		if (tab !== undefined && otg[tab][itemVal] !== undefined) {
+			txtVal = otg[tab][itemVal][context.locale]
+		}
+		context.config[itemName] = {
+      txt: txtName,
+      val: itemVal,
+      txtVal: txtVal,
+      mod: otg.Config[idx].cmd !== undefined,
+      src: source
+    }
+	}
+	context.emit('config', context.config)
+}
+
+
+// Local data processing function
+function otgProcessData(context, data) {
+	let str = String(data)
+	let res = str.match(/^(A|B|R|T)[0-9A-F]{8}$/) // match on OpenTherm messages only
+	if (res != null) {
+		// Found OpenTherm communication data
+		let sender = otg.Initiator[str[0]];
+		let ctype = otg.MsgType[parseInt(str[1], 16) & 0x7];
+		let msg = parseInt(str.substr(3, 2), 16);
+		if (ot.Messages[msg] !== undefined) {
+			let msgName = ot.Messages[msg].en;
+			let val1 = parseInt(str.substr(5, 2), 16);
+			let val2 = parseInt(str.substr(7, 2), 16);
+			let val = 0
+
+			// Keep track of unsupported message IDs
+			let override = (sender === "Answer" || sender === "Response")
+			if ((ctype === "Read-Ack" || ctype === "Write-Ack") && context.msg_supported[msg] === undefined && override === false) {
+				context.msg_supported[msg] = true
+			}
+
+			// Determine if the value received will update the variable
+			let valid = false
+			if (ctype == "Read-Ack") {
+				valid = (override && context.msg_supported[msg] === undefined) || (!override && context.msg_supported[msg] !== undefined)
+			} else if (ctype === "Write-Data") {
+				valid = true
+			} else if (ctype === "Data-Invalid") {
+				valid = override
+			}
+
+			if (valid) {
+				// If needed: format flags
+				let msgFlags = ot.Messages[msg].flags
+				if (msgFlags !== undefined) {
+					msgFlags = ot[msgFlags]
+					val = val1 * 256 + val2
+					for (let flag in msgFlags) {
+						let item = msgFlags[flag]
+						let flagVal = (val & parseInt(flag, 16)) ? true : false
+						//context.debug(API_DBG, ">> " + item.txt + ": " + flagVal)
+						if (item.var !== undefined) {
+							context.setValue(item.var, flagVal)
+						}
+					}
+				}
+				// Format value
+				let msgVal = ot.Messages[msg].val;
+				if (typeof msgVal === 'object') {
+					val = otf.decode(val1, msgVal.hb) + ' ' + otf.decode(val2, msgVal.lb)
+				} else {
+					val = otf.decode(val1, msgVal, val2)
+				}
+				let variable = ot.Messages[msg].var
+				if (variable !== undefined) {
+					if (typeof variable == 'object') {
+						context.setValue(variable.hb, val1)
+						context.setValue(variable.lb, val2)
+					} else {
+						context.setValue(variable, val)
+					}
+				}
+			}
+			context.debug(OTG_DBG, res[0], sender + ',', ctype + ',', msgName + ':', val)
+		 } else {
+			context.debug(API_DBG, 'Unknown OpenTherm message ID', msg)
+		}
+	} else if (context.userResponse === true) { // Receive queue handling
+		context.userResponse = false
+    let idx = str.indexOf('=') + 1 // Remove e.g. 'PR: A='
+    let val = (idx > 0 ? str.slice(idx) : str.slice(4))
+    context.debug(API_DBG, 'Received response', str)
+    context.emit('response', str, val)
+	} else if (context.responseQueue.length > 0) {
+    context.debug(API_DBG, context.responseQueue)
+    // We've sent a command for which a response is expected
+    let matched = false
+    for (let i = 0; i < context.responseQueue.length; i++) {
+  		let elem = context.responseQueue[i].resp
+  		let elem_t = otg.Config[elem]
+  		if (elem_t !== undefined) { // a known message
+  			let val = str.match(new RegExp(elem_t.ret)) // check expected response
+  			if (val != null) {
+  				val = val[1] // matched item is in second entry
+  			}
+  			if (val != null && elem_t.map !== undefined) { // apply mapping if available
+					val = elem_t.map[val]
+  			}
+  			if (val != null) { // valid response
+          context.responseQueue[i].promise.resolve(true)
+          context.responseQueue.splice(i, 1)
+  				otgAddConfig(context, elem, val, str)
+  				// call specific message handler (if registered)
+          context.emit('msg:' + elem, val)
+          matched = true
+          break
+  			}
+  		} else {
+        // try to match on known setting updates (e.g. 'HW: A')
+        // we only get here if we initiated the command!
+        let reply = str.split(':')
+        if (reply[0] !== undefined && otg.SettingUpdate[reply[0]] !== undefined && reply[1] !== undefined) {
+          let setting = otg.SettingUpdate[reply[0]]
+          let setting_t = otg[setting.table]
+          let value = reply[1].trim()
+          if (setting_t[value] !== undefined) {
+            // found a valid new setting
+            otgAddConfig(context, setting.config, value, str)
+          } else {
+            context.debug(API_DBG, 'Unknown setting value:', value, 'for setting', reply[0])
+          }
+        }
+        let val = str.match(new RegExp(elem)) // check expected response
+  			context.debug(API_DBG, val)
+        if (val != null) { // Only check start as we can expect e.g. 'OT: 12.3' and receive 'OT: 12.30'
+          context.debug(API_DBG, 'Matched expected response', elem, 'to', str)
+          context.responseQueue[i].promise.resolve(true)
+          context.responseQueue.splice(i, 1)
+          matched = true
+          break
+        }
+      }
+    }
+    if (!matched) {
+      context.debug(API_DBG, 'Could not match', str, 'to an expected response (ignoring)')
+    }
+  } else {
+    // Other OTG traffic
+    context.debug(API_DBG, 'Unknown message:', str, '(ignoring)')
+  }
+  // Check age of messages in send queue
+  let now = new Date()
+  for (let i = 0; i < context.responseQueue.length; i++) {
+    // queue is not empty, but this is not a match; check how long ago it was sent
+    let age = (now - context.responseQueue[i].when) / 1000 // in seconds
+    let cnt = context.responseQueue[i].resendCnt || 0
+    if (age > 10) {
+      context.debug(API_DBG, 'Message', i, 'in queue with age', age, 'and resend count', cnt)
+      context.responseQueue[i].resendCnt = ++cnt
+      if (cnt < 5) {
+        // no response after 10 seconds; re-send
+        context.debug(API_DBG, 'No response to message', context.responseQueue[i].sent, '- resending... (cnt =', cnt + ')')
+        context.writeCommand(i)
+      } else {
+        // Give up
+        context.responseQueue[i].promise.reject(new Error('Message not acknowledged'))
+      }
+    }
+  }
+
+}
+
+// Message handlers
+function otgRegisterListeners(context) {
+  context.on('found', found => {
+    let state = found ? 'available' : 'unavailabe'
+    context.emit(state)
+  })
+
+  context.on('msg:VER', (version) => {
+  	// Found PR=A (version information)
+  	context.fwMajorVersion = version.match(/\d/)
+  	context.found = true
+  	clearTimeout(context.searchTimer)
+  	context.emit('found', { found: true, ip: context.ip.addr, port: context.ip.port, version: version })
+  	context.debug(API_DBG, 'Found OpenTherm Gateway firmware version', version, '(major=' + context.fwMajorVersion + ')')
+  	// Update configuration based on version
+  	if (otg.VersionConfig[context.fwMajorVersion]) {
+  		for (let key in otg.VersionConfig[context.fwMajorVersion]) {
+  			if (otg.Config[key] === undefined) {
+  				otg.Config[key] = {} // new command
+  			}
+  			for (let x in otg.VersionConfig[context.fwMajorVersion][key]) {
+  				otg.Config[key][x] = otg.VersionConfig[context.fwMajorVersion][key][x]
+  			}
+  		}
+  	}
+    // Make sure we get regular data updates
+    context.writeCommand('PS=0')
+    // Now read all settings
+  	context.requestSettings()
+  })
+
+  context.on('msg:GW', (mode) => {
+  	context.gatewayMode = (mode === 1)
+  	context.debug(API_DBG, 'Gateway mode is now', context.gatewayMode)
+  })
+}

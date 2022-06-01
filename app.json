@@ -10,7 +10,7 @@
         "nl": "Bestuur je OpenTherm Gateway met Homey"
     },
     "category": "climate",
-    "version": "2.1.2",
+    "version": "2.2.0",
     "compatibility": ">=1.5.0",
     "author": {
       "name": "Ramón Baas",
@@ -1004,6 +1004,10 @@
   					"en": "Status flag gets",
   					"nl": "Statusvlag wordt"
   				},
+          "titleFormatted": {
+  					"en": "Status flag gets [[values]]",
+  					"nl": "Statusvlag wordt [[values]]"
+  				},
   				"args": [
   					{
   						"name": "values",
@@ -1034,6 +1038,7 @@
   				"tokens": [
   					{
   						"name": "flag",
+              "type": "string",
   						"title": {
   							"en": "Status flag",
   							"nl": "Statusvlag"
@@ -1047,6 +1052,10 @@
   				"title": {
   					"en": "Boiler fault code gets",
   					"nl": "Ketelstoringscode wordt"
+  				},
+          "titleFormatted": {
+  					"en": "Boiler fault code gets [[values]]",
+  					"nl": "Ketelstoringscode wordt [[values]]"
   				},
   				"args": [
   					{
@@ -1078,13 +1087,15 @@
   				"tokens": [
   					{
   						"name": "OEM",
+              "type": "number",
   						"title": {
   							"en": "OEM code"
   						},
-              "example": "0"
+              "example": 0
   					},
   					{
   						"name": "type",
+              "type": "string",
   						"title": {
   							"en": "Fault type",
   							"nl": "Type fout"
@@ -1098,6 +1109,10 @@
   				"title": {
   					"en": "Room setpoint override gets",
   					"nl": "Overschrijven kamertemp. wordt"
+  				},
+          "titleFormatted": {
+  					"en": "Room setpoint override gets [[values]]",
+  					"nl": "Overschrijven kamertemp. wordt [[values]]"
   				},
   				"args": [
   					{
@@ -1154,6 +1169,7 @@
   				"tokens": [
   					{
   						"name": "response",
+              "type": "string",
   						"title": {
   							"en": "Response",
   							"nl": "Antwoord"
@@ -1162,6 +1178,7 @@
   					},
   					{
   						"name": "result",
+              "type": "string",
   						"title": {
   							"en": "Result",
   							"nl": "Resultaat"
@@ -1193,6 +1210,10 @@
   				"title": {
   					"en": "Set hot water mode",
   					"nl": "Zet tapwater mode"
+  				},
+          "titleFormatted": {
+  					"en": "Set hot water mode to [[mode]]",
+  					"nl": "Zet tapwater mode naar [[mode]]"
   				},
   				"args": [
   					{
@@ -1249,6 +1270,10 @@
   					"en": "Set outside temperature",
   					"nl": "Zet buitentemperatuur"
   				},
+          "titleFormatted": {
+  					"en": "Set outside temperature to [[temperature]]",
+  					"nl": "Zet buitentemperatuur op [[temperature]]"
+          },
   				"args": [
   					{
   						"name": "temperature",
@@ -1270,6 +1295,10 @@
   					"en": "Set humidity level",
   					"nl": "Zet luchtvochtigheid"
   				},
+          "titleFormatted": {
+  					"en": "Set humidity level to [[humidity]]",
+  					"nl": "Zet luchtvochtigheid op [[humidity]]"
+  				},
   				"args": [
   					{
   						"name": "humidity",
@@ -1290,6 +1319,10 @@
   				"title": {
   					"en": "Send Gateway command",
   					"nl": "Verstuur commando"
+  				},
+          "titleFormatted": {
+  					"en": "Send Gateway command [[command]]",
+  					"nl": "Verstuur commando [[command]]"
   				},
   				"args": [
   					{

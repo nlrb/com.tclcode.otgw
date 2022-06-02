@@ -202,9 +202,9 @@ module.exports = class GatewayDevice extends Homey.Device {
   }
 
   setValues(config) {
-    config.GatewayMode && this.setCapabilityValue('monitor_mode', config.GatewayMode.val === 0)
+    config.GatewayMode && this.setCapabilityValue('monitor_mode', config.GatewayMode.val === 0).catch(this.error)
     let value = this.api.getBoilerHotWater()
-    if (value !== undefined) { this.setCapabilityValue('dhw_setting', value) }
+    if (value !== undefined) { this.setCapabilityValue('dhw_setting', value).catch(this.error) }
     // Update the device configuration
     if (Object.keys(config).length === 16) { // Not showing: DHWSetting
       let newSettings = {

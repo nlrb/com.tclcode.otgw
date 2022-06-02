@@ -14,9 +14,9 @@ module.exports = class ThermostatDevice extends SensorDevice {
     let target = override !== undefined && override > 0 ? override : setpoint
     let mode = (setpoint !== undefined && override >= current ? 'heat' : (override > 0 && override < current ? 'cool' : 'auto'))
     this.log(override, setpoint, current, mode)
-    if (current !== undefined) { this.setCapabilityValue('measure_temperature', current) }
-    if (target !== undefined) { this.setCapabilityValue('target_temperature', target) }
-    if (mode !== undefined) { this.setCapabilityValue('thermostat_mode', mode) }
+    if (current !== undefined) { this.setCapabilityValue('measure_temperature', current).catch(this.error) }
+    if (target !== undefined) { this.setCapabilityValue('target_temperature', target).catch(this.error) }
+    if (mode !== undefined) { this.setCapabilityValue('thermostat_mode', mode).catch(this.error) }
   }
 
   async onInit() {
@@ -55,7 +55,7 @@ module.exports = class ThermostatDevice extends SensorDevice {
       })
     } else {
       this.once('api_available', () => this.registerListeners([
-        { var: 'var:CH2CurrentSetpoint', func: (val) => { this.setCapabilityValue('target_temperature', val) } }
+        { var: 'var:CH2CurrentSetpoint', func: (val) => { this.setCapabilityValue('target_temperature', val).catch(this.error) } }
       ]))
     }
 
@@ -88,7 +88,7 @@ module.exports = class ThermostatDevice extends SensorDevice {
       this.targetTempOverride()
     } else { // T2
       let value = this.api.getValue('CH2CurrentSetpoint')
-      if (value !== undefined) { this.setCapabilityValue('target_temperature', value) }
+      if (value !== undefined) { this.setCapabilityValue('target_temperature', value).catch(this.error) }
     }
   }
 

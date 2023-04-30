@@ -18,11 +18,11 @@ module.exports = class GatewayDevice extends Homey.Device {
   async onInit() {
     this.log('Starting gateway device')
     this.id = await this.getData().id
-    this.api = Homey.app.getGateway(this.id)
+    this.api = this.homey.app.getGateway(this.id)
     if (!this.api) {
       this.log('Opening communication to gateway device')
-      this.api = new otga(Homey.app.locale)
-      Homey.app.addGateway(this.api, this.id)
+      this.api = new otga(this.homey.app.locale)
+      this.homey.app.addGateway(this.api, this.id)
     }
 
     // Register listeners for value updates
@@ -56,10 +56,9 @@ module.exports = class GatewayDevice extends Homey.Device {
     let handlers = {}
 
     for (let t in triggers) {
-      handlers[triggers[t]] = new Homey.FlowCardTriggerDevice(triggers[t])
+      handlers[triggers[t]] = this.homey.flow.getDeviceTriggerCard(triggers[t])
       handlers[triggers[t]]
         .registerRunListener(flowCheck)
-        .register()
     }
 
     // 1a. Register all status variables
@@ -79,7 +78,7 @@ module.exports = class GatewayDevice extends Homey.Device {
     // 1b. faultcode (on/off); tokens: OEM, name
     const faultHandler = (flag, value) => {
       this.log("Sending trigger 'faultcode' of type", flag)
-      let oemFault = this.api.getValue('OEMFaultCode') || 'Not supported'
+      let oemFault = this.api.getValue('OEMFaultCode') || 0
       handlers.faultcode.trigger(this, { type: flag, OEM: oemFault }, { value: value })
         .catch(this.error)
     }
@@ -91,7 +90,7 @@ module.exports = class GatewayDevice extends Homey.Device {
     }
 
     // 1c. override (on/off); token: temp
-    handlers.override = new Homey.FlowCardTriggerDevice('override')
+    handlers.override = this.homey.flow.getDeviceTriggerCard('override')
     handlers.override
       .registerRunListener((args, state) => {
         let result = (state.value === 0) !== (args.values === 'on')
@@ -99,7 +98,6 @@ module.exports = class GatewayDevice extends Homey.Device {
         // If true, this flow should run
         return Promise.resolve(result)
       })
-      .register()
 
     this.api.on('var:RemoteOverrideRoomSetpoint', value => {
       this.log('Sending trigger override with token temp:', value)
@@ -108,9 +106,7 @@ module.exports = class GatewayDevice extends Homey.Device {
     })
 
     // 1d. command; tokens: response, result
-    let commandTrigger = new Homey.FlowCardTriggerDevice('command')
-    commandTrigger
-      .register()
+    let commandTrigger = this.homey.flow.getDeviceTriggerCard('command')
 
     this.api.on('response', (response, result) => {
       this.log("Sending trigger 'response' with tokens", response, 'and', result)
@@ -121,9 +117,8 @@ module.exports = class GatewayDevice extends Homey.Device {
      * 2. Conditions
      *   a. override
      */
-     let condition = new Homey.FlowCardCondition('override')
+     let condition = this.homey.flow.getConditionCard('override')
      condition
-       .register()
        .registerRunListener((args, state) => {
          let override = this.api.getValue('RemoteOverrideRoomSetpoint')
          let active = (override !== undefined && override !== '0.00')
@@ -146,12 +141,11 @@ module.exports = class GatewayDevice extends Homey.Device {
       { id: 'sendCommand', fn: 'sendCommand', arg: 'command' }
     ]
     for (let a in actions) {
-      let action = new Homey.FlowCardAction(actions[a].id)
+      let action = this.homey.flow.getActionCard(actions[a].id)
       try {
         let fn = 'this.api.' + actions[a].fn
         let arg = actions[a].arg
         action
-          .register()
           .registerRunListener((args, state) => {
             return (arg ? eval(fn + '(args.' + arg + ')') : eval(fn))
           })
@@ -173,7 +167,7 @@ module.exports = class GatewayDevice extends Homey.Device {
   }
 
   onDeleted() {
-    Homey.app.deleteGateway(this.id)
+    this.homey.app.deleteGateway(this.id)
   }
 
   onSettings(oldSettings, newSettings, changedKeys, callback) {

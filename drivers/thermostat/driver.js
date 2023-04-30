@@ -19,14 +19,14 @@ module.exports = class ThermostatDriver extends Homey.Driver {
 		this.log('OTG Thermostat pairing has started...')
 
 		// Select the OTG
-		socket.on('loaded', () => {
-			socket.emit('select', Homey.app.getGatewayList())
+		socket.setHandler('loaded', () => {
+			socket.emit('select', this.homey.app.getGatewayList())
 		})
 
-		socket.on('selected', id => {
+		socket.setHandler('selected', id => {
 			this.log('Selected gateway is', id)
 			this.gid = id
-			this.api = Homey.app.getGateway(id)
+			this.api = this.homey.app.getGateway(id)
 			// Check if we have found and OTG
       this.log('Found:', this.api.checkFound())
 			socket.emit('authorized', this.api.checkFound())
@@ -34,8 +34,8 @@ module.exports = class ThermostatDriver extends Homey.Driver {
 
 		// this method is run when Homey.emit('list_devices') is run on the front-end
 		// which happens when you use the template `list_devices`
-		socket.on('list_devices', (data, callback) => {
-			const locale = Homey.ManagerI18n.getLanguage()
+		socket.setHandler('list_devices', (data) => {
+			const locale = this.homey.i18n.getLanguage()
 			// Create a list of thermostats
 			let devices = [{
 				name: (locale === 'nl' ? "Thermostaat" : "Thermostat"),
@@ -58,8 +58,7 @@ module.exports = class ThermostatDriver extends Homey.Driver {
 					capabilities: [ 'target_temperature' ]
 				}
 			}
-			// err, result style
-			callback(null, devices)
+			return devices;
 		})
 
 	}

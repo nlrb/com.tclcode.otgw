@@ -20,7 +20,7 @@ module.exports = class SensorDevice extends Homey.Device {
     this.id = data.id // Device ID
     this.gid = data.gid // Gateway ID
     this.listen = [] // wacthes with functions
-    this.api = Homey.app.getGateway(this.gid)
+    this.api = this.homey.app.getGateway(this.gid)
 
     if (ignoreWatch !== true) {
       this.watches = data.watch // Variables to watch
@@ -41,13 +41,13 @@ module.exports = class SensorDevice extends Homey.Device {
     } else {
       /* Start code for backward compatibility */
       if (this.gid === undefined) {
-        let keys = await Homey.ManagerSettings.getKeys()
+        let keys = await this.homey.settings.getKeys()
     		if (keys.length > 0) {
     			if (keys.indexOf('network') >= 0) {
     				// Old settings - convert to new format
     				let settings = {}
     				for (let k in keys) {
-    					settings[keys[k]] = await Homey.ManagerSettings.get(keys[k])
+    					settings[keys[k]] = await this.homey.settings.get(keys[k])
     				}
             this.gid = 'OTG:' + settings.network.ip + ':' + settings.network.port
           }
@@ -55,23 +55,23 @@ module.exports = class SensorDevice extends Homey.Device {
       }
       /* End code for backward compatibility */
       this.log('Gateway', this.gid || 'Unknown', 'is not available:', this.id)
-      this.setUnavailable(Homey.__('error.gateway_unavailable'))
+      this.setUnavailable(this.homey.__('error.gateway_unavailable'))
     }
 
-    Homey.app.on('available', id => {
+    this.homey.app.on('available', id => {
       if (id === this.gid) {
         this.log('Gateway', id, 'has become available')
-        this.api = Homey.app.getGateway(this.gid)
+        this.api = this.homey.app.getGateway(this.gid)
         this.emit('api_available')
         this.setAvailable()
         this.setValues()
       }
     })
 
-    Homey.app.on('unavailable', id => {
+    this.homey.app.on('unavailable', id => {
       this.log('Gateway', id, 'has become unavailable')
       if (id === this.gid) {
-        this.setUnavailable(Homey.__('error.gateway_unavailable'))
+        this.setUnavailable(this.homey.__('error.gateway_unavailable'))
       }
     })
   }

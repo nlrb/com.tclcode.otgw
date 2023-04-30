@@ -31,21 +31,21 @@ module.exports = class SensorDriver extends Homey.Driver {
 		this.log('Sensor pairing has started...');
 
 		// Select the OTG
-		socket.on('loaded', () => {
-			socket.emit('select', Homey.app.getGatewayList())
+		socket.setHandler('loaded', () => {
+			socket.emit('select', this.homey.app.getGatewayList())
 		})
 
-		socket.on('selected', id => {
+		socket.setHandler('selected', id => {
 			this.log('Selected gateway is', id)
 			this.gid = id
-			this.api = Homey.app.getGateway(id)
+			this.api = this.homey.app.getGateway(id)
 			// Check if we have found and OTG
 			socket.emit('authorized', this.api.checkFound())
 		})
 
 		// this method is run when Homey.emit('list_devices') is run on the front-end
 		// which happens when you use the template `list_devices`
-		socket.on('list_devices', async (data, callback) => {
+		socket.setHandler('list_devices', async (data) => {
 			// Get list of sensors of type <sort>
 			let sensors = this.api.getAvailableSensors(this.type)
 			let devices = []
@@ -87,7 +87,7 @@ module.exports = class SensorDriver extends Homey.Driver {
 					devices.push(device)
 				}
 			}
-			let appsetting = await Homey.ManagerSettings.get('app')
+			let appsetting = await this.homey.settings.get('app')
 			if (appsetting != null && appsetting.duplicates !== true) {
 				// Identify which sensor values are already in other sensor add_devices and remove these from the list
 				let hdevices = await this.getDevices()
@@ -103,8 +103,7 @@ module.exports = class SensorDriver extends Homey.Driver {
 					}
 				}
 			}
-			// err, result style
-			callback(null, devices)
+			return devices;
 		})
 
 	}

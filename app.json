@@ -1,6 +1,6 @@
 {
     "id": "com.tclcode.otgw",
-    "sdk": 2,
+    "sdk": 3,
     "brandColor": "#36A38C",
     "name": {
         "en": "OpenTherm Gateway"
@@ -10,8 +10,8 @@
         "nl": "Bestuur je OpenTherm Gateway met Homey"
     },
     "category": "climate",
-    "version": "2.2.0",
-    "compatibility": ">=1.5.0",
+    "version": "3.0.0",
+    "compatibility": ">=5.0.0",
     "author": {
       "name": "Ramón Baas",
   		"website": "http://otgw.tclcode.com/"
@@ -1340,113 +1340,17 @@
   		]
     },
   	"permissions": [
-      "homey:manager:speech-input",
+      "homey:manager:api",
       "homey:manager:speech-output"
     ],
-  	"speech": {
-      "en": {
-        "element": {
-          "actionWords": {
-            "type": "regex",
-            "value": "what\\sis\\sthe"
-          },
-          "error": {
-            "type": "regex",
-            "value": "(problem|fault|error)"
-          },
-          "boiler": {
-            "type": "regex",
-            "value": "(boiler|kettle)"
-          },
-          "wpressure": {
-            "type": "regex",
-            "value": "(water)?(\\s)?pressure"
-          },
-          "wtemp": {
-            "type": "regex",
-            "value": "(water)?(\\s)?temperature"
-          },
-          "ttemp": {
-            "type": "regex",
-            "value": "target\\stemperature"
-          },
-          "rtemp": {
-            "type": "regex",
-            "value": "room\\stemperature"
-          },
-          "thermostat": {
-            "type": "string",
-            "value": "thermostat"
-          }
-        },
-        "group": {
-          "problem": {
-            "set": "(actionWords) && error && boiler",
-            "ordered": false,
-            "allowDisconnect": true,
-            "capturingGroup": true
-          },
-          "pressure": {
-            "set": "(actionWords) && (boiler) && wpressure",
-            "ordered": false,
-            "allowDisconnect": true,
-            "capturingGroup": true
-          },
-          "boilertemp": {
-            "set": "(actionWords) && boiler && wtemp",
-            "ordered": false,
-            "allowDisconnect": true,
-            "capturingGroup": true
-          },
-          "targettemp": {
-            "set": "(actionWords) && (thermostat) && ttemp",
-            "ordered": false,
-            "allowDisconnect": true,
-            "capturingGroup": true
-          },
-          "roomtemp": {
-            "set": "(actionWords) && rtemp",
-            "ordered": false,
-            "allowDisconnect": true,
-            "capturingGroup": true
-          }
-        }
+    "api": {
+      "getOtgwConfig": {
+        "method": "get",
+        "path": "/getOtgwConfig"
       },
-      "nl": {
-        "element": {
-          "actionWords": {
-            "type": "regex",
-            "value": "wat\\sis\\s(het|de)"
-          },
-          "error": {
-            "type": "regex",
-            "value": "(probleem|fout)"
-          },
-          "boiler": {
-            "type": "regex",
-            "value": "(boiler|ketel)"
-          },
-          "wpressure": {
-            "type": "regex",
-            "value": "(water)?(\\s)?druk"
-          },
-          "wtemp": {
-            "type": "regex",
-            "value": "(water)?(\\s)?temperatuur"
-          },
-          "ttemp": {
-            "type": "regex",
-            "value": "doel(\\s)?temperatuur"
-          },
-          "thermostat": {
-            "type": "string",
-            "value": "thermostaat"
-          },
-          "rtemp": {
-            "type": "regex",
-            "value": "kamer(\\s)?temperatuur"
-          }
-        }
+      "getOtgwVars": {
+        "method": "get",
+        "path": "/getOtgwVars"
       }
     },
   	"dependencies": {

@@ -11,14 +11,14 @@ module.exports = class SensorDriver extends Homey.Driver {
 		this.log('Boiler pairing has started...')
 
 		// Select the OTG
-		socket.on('loaded', () => {
-			socket.emit('select', Homey.app.getGatewayList())
+		socket.setHandler('loaded', () => {
+			socket.emit('select', this.homey.app.getGatewayList())
 		})
 
-		socket.on('selected', id => {
+		socket.setHandler('selected', id => {
 			this.log('Selected gateway is', id)
 			this.gid = id
-			this.api = Homey.app.getGateway(id)
+			this.api = this.homey.app.getGateway(id)
 			// Check if we have found and OTG
       this.log('Found:', this.api.checkFound())
 			socket.emit('authorized', this.api.checkFound())
@@ -26,7 +26,7 @@ module.exports = class SensorDriver extends Homey.Driver {
 
 		// this method is run when Homey.emit('list_devices') is run on the front-end
 		// which happens when you use the template `list_devices`
-		socket.on('list_devices', (data, callback) => {
+		socket.setHandler('list_devices', (data) => {
       this.log('Listing devices for', this.gid)
 			let devices = [{
 				name: 'Boiler',
@@ -35,8 +35,7 @@ module.exports = class SensorDriver extends Homey.Driver {
           gid: this.gid
         }
 			}]
-			// err, result style
-			callback(null, devices)
+			return devices;
 		})
 
 	}

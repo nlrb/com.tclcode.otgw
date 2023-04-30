@@ -22,16 +22,16 @@ module.exports = class GatewayDriver extends Homey.Driver {
 		this.log('Gateway pairing has started...')
 
 		/* Start code for backward compatibility */
-		let network = await Homey.ManagerSettings.get('network')
+		let network = await this.homey.settings.get('network')
 		if (network && network.ip && network.port) {
 			// We've found (legacy) network app settings; use these as default value
 			socket.emit('try', network)
 		}
 		/* End code for backward compatibility */
 
-		socket.on('search', (data) => {
+		socket.setHandler('search', (data) => {
       if (data && data.ip && data.port) {
-        let api = new otgw(Homey.app.locale)
+        let api = new otgw(this.homey.app.locale)
         this.log('Starting search on', data)
 				const tempDebugListener = data => this.log(data.msg)
 				api.setDebug(3) // APP & API
@@ -52,7 +52,7 @@ module.exports = class GatewayDriver extends Homey.Driver {
               }
             }
             try {
-              Homey.app.addGateway(api)
+              this.homey.app.addGateway(api)
             } catch (e) {
               socket.emit('available', { found: false, error: e })
               api.closePort()

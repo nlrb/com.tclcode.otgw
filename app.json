@@ -1340,7 +1340,6 @@
   		]
     },
   	"permissions": [
-      "homey:manager:api",
       "homey:manager:speech-output"
     ],
     "api": {

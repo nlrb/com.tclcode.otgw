@@ -37,7 +37,6 @@
 			}
 			input[type="radio"]:not(:checked)+label{ font-weight: lighter; }
 		</style>
-		<link rel="stylesheet" type="text/css" href="/manager/devices/devicesettings/css/devicesettings.css">
 		<script type="text/javascript" src="/homey.js" data-origin="settings"></script>
 		<script type="text/javascript" src="/manager/webserver/assets/js/angular.js"></script>
 		<script>
@@ -46,7 +45,7 @@
 			.controller('SettingsCtrl', ['$scope', '$timeout', function($scope, $timeout) {
 				$scope.foundOTG = false;
 				$scope.message = '';
-				$scope.collapse = { app: false, debug: true };
+				$scope.collapse = { app: false, debug: false };
 				$scope.duplicates = false;
 				$scope.debugLevels = []
 				for (let i = 0; i < 8; i++) {

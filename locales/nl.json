@@ -38,7 +38,10 @@
       "search": {
         "title": "Zoeken naar de OpenTherm Gateway op __addr__...",
   			"success": "De OpenTherm Gateway is gevonden. De instellingen zijn opgeslagen.",
-  			"failed": "De OpenTherm Gateway kan niet gevonden worden op __addr__!"
+  			"failed": {
+          "not_found": "De OpenTherm Gateway kan niet gevonden worden op __addr__!",
+          "duplicate": "De OpenTherm Gateway op __addr__ bestaat al!"
+        }
       },
       "failed": "Het toevoegen van de gateway gaf fout: __detail__"
     },

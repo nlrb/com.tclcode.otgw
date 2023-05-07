@@ -38,7 +38,10 @@
       "search": {
         "title": "Searching for OpenTherm Gateway on __addr__...",
   			"success": "Found your OpenTherm Gateway. Settings have been saved.",
-  			"failed": "Unable to locate the OpenTherm Gateway on __addr__!"
+        "failed": {
+          "not_found": "Unable to locate the OpenTherm Gateway on __addr__!",
+          "duplicate": "The OpenTherm Gateway on __addr__ already exists!"
+        }
       },
       "failed": "Adding the device failed with error: __detail__"
     },

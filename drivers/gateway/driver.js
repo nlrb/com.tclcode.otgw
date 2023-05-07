@@ -54,11 +54,11 @@ module.exports = class GatewayDriver extends Homey.Driver {
             try {
               this.homey.app.addGateway(api)
             } catch (e) {
-              socket.emit('available', { found: false, error: e })
-              api.closePort()
+              data = { found: false, error: e };
+              api.closePort();
             }
           } else {
-            api.closePort()
+            api.closePort();
           }
           socket.emit('available', data)
           // Remove this listener, we don't need it anymore

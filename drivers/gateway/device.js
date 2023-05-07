@@ -25,6 +25,20 @@ module.exports = class GatewayDevice extends Homey.Device {
       this.homey.app.addGateway(this.api, this.id)
     }
 
+    this.homey.app.on('unavailable', id => {
+      this.log('Gateway', id, 'has become unavailable')
+      if (id === this.id) {
+        this.setUnavailable(this.homey.__('error.gateway_unavailable'))
+      }
+    })
+
+    this.homey.app.on('available', id => {
+      this.log('Gateway', id, 'has become unavailable')
+      if (id === this.id) {
+        this.setAvailable()
+      }
+    })
+
     // Register listeners for value updates
     this.api.on('config', async config => {
       // Set the values in the mobile card
@@ -170,7 +184,7 @@ module.exports = class GatewayDevice extends Homey.Device {
     this.homey.app.deleteGateway(this.id)
   }
 
-  onSettings(oldSettings, newSettings, changedKeys, callback) {
+  onSettings({ oldSettings, newSettings, changedKeys }) {
     let ip = {}
     let gateway = []
     for (let k in changedKeys) {
@@ -191,8 +205,6 @@ module.exports = class GatewayDevice extends Homey.Device {
       this.api.closePort()
       setTimeout(() => this.api.openPort(ip.addr, ip.port), 1000) // wait a second before re-opening
     }
-    // Make sure the changes stick
-    callback(null, true)
   }
 
   setValues(config) {

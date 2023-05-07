@@ -80,7 +80,11 @@
 			var ip = $('#ip').val();
 			var port = $('#port').val();
 			var address = ip + ':' + port;
-			displayMessage(__('pair.gateway.search.failed', { addr: address }), true);
+			if (data.error) {
+				displayMessage(__('pair.gateway.search.failed.duplicate', { addr: address }), true);
+			} else {
+				displayMessage(__('pair.gateway.search.failed.not_found', { addr: address }), true);
+			}
 			$('#search_button').prop('disabled', false);
 			$('#ip').val('');
 			$('#port').val('');

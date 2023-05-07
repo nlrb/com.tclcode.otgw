@@ -9,6 +9,6 @@
     "en": "Added OpenTherm messages; improved error handling"
   },
   "3.0.0": {
-    "en": "Update to SDK v3"
+    "en": "Update to SDK v3; fixed connection issues; improved error handling"
   }
 }

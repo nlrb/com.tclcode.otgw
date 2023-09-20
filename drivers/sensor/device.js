@@ -64,6 +64,7 @@ module.exports = class SensorDevice extends Homey.Device {
         this.api = this.homey.app.getGateway(this.gid)
         this.emit('api_available')
         this.setAvailable()
+          .catch(this.error)
         this.setValues()
       }
     })
@@ -72,6 +73,7 @@ module.exports = class SensorDevice extends Homey.Device {
       this.log('Gateway', id, 'has become unavailable')
       if (id === this.gid) {
         this.setUnavailable(this.homey.__('error.gateway_unavailable'))
+          .catch(this.error)
       }
     })
   }

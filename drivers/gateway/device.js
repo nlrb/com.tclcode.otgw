@@ -29,6 +29,7 @@ module.exports = class GatewayDevice extends Homey.Device {
       this.log('Gateway', id, 'has become unavailable')
       if (id === this.id) {
         this.setUnavailable(this.homey.__('error.gateway_unavailable'))
+          .catch(this.error)
       }
     })
 
@@ -36,6 +37,7 @@ module.exports = class GatewayDevice extends Homey.Device {
       this.log('Gateway', id, 'has become unavailable')
       if (id === this.id) {
         this.setAvailable()
+          .catch(this.error)
       }
     })
 

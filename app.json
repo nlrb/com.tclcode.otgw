@@ -10,7 +10,7 @@
     "nl": "Bestuur je OpenTherm Gateway met Homey"
   },
   "category": "climate",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "compatibility": ">=5.0.0",
   "author": {
     "name": "Ramón Baas",

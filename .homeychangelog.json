@@ -13,5 +13,8 @@
   },
   "3.0.1": {
     "en": "Improve error handling"
+  },
+  "3.0.2": {
+    "en": "Bug fix on search"
   }
 }
